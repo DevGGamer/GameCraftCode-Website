@@ -5,7 +5,7 @@ import VRCharacterImage from '../../../../Images/StartPage/vrcharacter.png'
 
 const MainSection: React.FC = () => {
     return (
-        <section className={styles.main_section}>
+        <section id={styles.main_section}>
             <div className={styles.content_wrapper}>
                 <div className={styles.left_block}>
                     <h1>

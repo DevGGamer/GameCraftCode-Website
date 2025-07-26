@@ -11,7 +11,7 @@ const Header: React.FC = () => {
                 </div>
                 <nav>
                     <ul className={styles.nav_list}>
-                        <li><a href="" className={styles.selected}>О нас</a></li>
+                        <li><a href="#about_section" className={styles.selected}>О нас</a></li>
                         <li><a href="">Курсы</a></li>
                         <li><a href="">Тарифы</a></li>
                         <li><a href="">Личный кабинет</a></li>

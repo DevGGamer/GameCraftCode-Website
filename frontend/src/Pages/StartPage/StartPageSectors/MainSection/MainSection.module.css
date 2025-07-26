@@ -1,5 +1,5 @@
-.main_section {
-    min-height: 960px;
+#main_section {
+    min-height: 900px;
     background-image: url('../../../../Images/StartPage/MainSectionBG.png');
     background-repeat: no-repeat;
     background-size: cover;

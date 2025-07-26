@@ -3,7 +3,7 @@ import styles from './PriceSection.module.css';
 
 const PriceSection: React.FC = () => {
     return (
-        <section className={styles.price_section}>
+        <section id={styles.price_section}>
 
         </section>
     );

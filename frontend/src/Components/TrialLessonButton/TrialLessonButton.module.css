@@ -9,10 +9,9 @@
     border-radius: 18px;
     min-height: 64px;
     cursor: pointer;
-    transition: transform 0.5s ease-out, box-shadow 0.5s ease-out;
+    transition: box-shadow 0.3s ease-out;
 }
 
 .trial_lesson_button:hover {
     box-shadow: 0 0 16px rgba(131, 77, 242, 0.6), 0 0 32px rgba(18, 121, 248, 0.4);
-    transform: scale(1.01);
 }
