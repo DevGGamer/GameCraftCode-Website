@@ -1,3 +1,62 @@
 .main_section {
-    
+    min-height: 960px;
+    background-image: url('../../../../Images/StartPage/MainSectionBG.png');
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position: top;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 64px;
+}
+
+.content_wrapper {
+    display: flex;
+    justify-content: space-between;
+    align-items: stretch;
+    max-width: 1440px;
+    width: 100%;
+}
+
+.left_block {
+    color: white;
+    max-width: 900px;
+    position: relative;
+}
+
+.left_block h1 {
+    font-size: 96px;
+    font-weight: 700;
+    line-height: 1.2;
+    color: #00D9FF;
+    margin-bottom: 40px;
+    margin-top: 0px;
+}
+
+.left_block p {
+    font-size: 36px;
+    color: #C69CFF;
+    margin-bottom: 40px;
+    max-width: 70%;
+}
+
+.right_block {
+    display: flex;
+    align-items: end;
+    position: absolute;
+    right: -650px;
+    top: 0%;
+}
+
+.right_block .hero_image {
+    width: 100%;
+    max-width: 740px;
+    height: auto;
+}
+
+.trial_lesson_button {
+    max-width: 640px;
+    max-height: 92px;
+    font-size: 32px;
+    padding: 25px 69px;
 }
