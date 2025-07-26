@@ -1,3 +1,127 @@
-.about_section {
-    
+#about_section {
+    display: flex;
+    justify-content: center;
 }
+
+.about_wrapper {
+    max-width: 1920px;
+    width: 100%;
+    padding: 64px 192px;
+}
+
+.card {
+    min-height: 640px;
+    position: relative;
+    padding: 48px 48px 64px;
+    border: 1px solid #00D9FF;
+    border-radius: 20px;
+    background-color: #05062E;
+    color: #FFFFFF;
+    font-size: 20px;
+    line-height: 1.6;
+    margin-bottom: 165px;
+}
+
+.card h2 {
+    font-size: 64px;
+    color: #00D9FF;
+    margin-bottom: 24px;
+    margin-top: 0px;
+}
+
+.card p
+{
+    font-size: 32px;
+    margin: 0px;
+}
+
+.highlight {
+    color: #00D9FF;
+    text-shadow: 0 0 4px #00D9FF;
+    font-weight: 700;
+}
+
+.icon {
+    margin-right: 8px;
+}
+
+.icon img {
+    position: relative;
+    top: 10px;
+    width: 32px;
+    height: auto;
+}
+
+.rocket {
+    position: absolute;
+    bottom: -160px;
+    right: -160px;
+    width: 320px;
+    height: auto;
+    pointer-events: none;
+}
+
+.about_reasons {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    margin-bottom: 165px;
+}
+
+.about_section_header {
+    color: #00D9FF;
+    font-size: 64px;
+    font-weight: 700;
+    text-align: center;
+    padding: 16px 32px;
+    border: 2px solid #00D9FF;
+    border-radius: 40px;
+    display: inline-block;
+    box-shadow: 0 0 12px rgba(0, 217, 255, 0.6);
+    background-color: #05062E;
+    margin-top: 0px;
+    margin-bottom: 40px;
+}
+
+.reasons {
+    display: flex;
+    width: 100%;
+    gap: 60px;
+    flex-direction: column;
+    align-items: center;
+}
+
+.reason_section {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+}
+
+.reason_card {
+    max-width: 450px;
+    flex-grow: 1;
+    text-align: center;
+    color: #FFFFFF;
+    font-size: 18px;
+    font-weight: 500;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.reason_card img {
+    width: 215px;
+    height: auto;
+}
+
+.reason_card p {
+    margin: 0px;
+    font-size: 36px;
+}
+
+.about_education img {
+    width: 100%;
+    height: auto;
+}
+

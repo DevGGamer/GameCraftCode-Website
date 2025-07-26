@@ -1,6 +1,11 @@
 header {
     display: flex;
     justify-content: center;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    background-color: #0e113ace;
+    backdrop-filter: blur(4px);
 }
 
 .header_container {
@@ -8,10 +13,10 @@ header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 8px 64px; 
+    padding: 20px 64px; 
 }
 
-.school_logo h1{
+.school_logo h1 {
     margin: 0px;
     color: #00D9FF;
     font-size: 48px;
@@ -22,6 +27,7 @@ header {
     align-items: center;
     list-style: none;
     gap: 52px;
+    margin: 0px;
 }
 
 .nav_list a
@@ -48,8 +54,4 @@ header {
     background-color: #00D9FF;
     border-top-left-radius: 4px;
     border-top-right-radius: 4px;
-}
-
-.nav_list .trial_lesson_button:hover {
-    cursor: pointer;
 }

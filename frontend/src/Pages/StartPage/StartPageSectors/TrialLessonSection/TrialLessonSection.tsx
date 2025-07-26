@@ -3,7 +3,7 @@ import styles from './TrialLessonSection.module.css';
 
 const TrialLessonSection: React.FC = () => {
     return (
-        <section className={styles.trial_lesson_section}>
+        <section id={styles.trial_lesson_section}>
 
         </section>
     );
