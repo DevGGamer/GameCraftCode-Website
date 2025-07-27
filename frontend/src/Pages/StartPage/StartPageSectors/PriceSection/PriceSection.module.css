@@ -1,3 +1,103 @@
 #price_section {
-    
+    padding: 3rem 1rem;
+    color: white;
+    text-align: center;
 }
+
+.title {
+    font-size: 2rem;
+    font-weight: bold;
+    margin-bottom: 2rem;
+    color: #00eaff;
+    border: 2px solid #00eaff;
+    display: inline-block;
+    padding: 0.5rem 2rem;
+    border-radius: 20px;
+}
+
+.cardContainer {
+    display: flex;
+    justify-content: center;
+    flex-wrap: nowrap;
+    gap: 1.5rem;
+    scroll-snap-type: x mandatory;
+    padding: 0 1rem;
+    width: max-content;
+    min-width: 100%;
+}
+
+.card {
+    flex: 0 0 auto;
+    scroll-snap-align: start;
+    background-color: #0a0a24;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 16px;
+    width: 240px;
+    padding: 1.5rem 1rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    transition: transform 0.2s;
+}
+
+.tariffLabel {
+    font-size: 1rem;
+    color: #cccccc;
+}
+
+.tariffTitle {
+    font-size: 1.3rem;
+    font-weight: bold;
+    margin-bottom: 1rem;
+}
+
+.featureList {
+    list-style: none;
+    padding: 0;
+    margin: 1rem 0;
+    text-align: left;
+    font-size: 0.95rem;
+    flex-grow: 1;
+}
+
+.featureItem {
+    margin-bottom: 0.5rem;
+}
+
+.positive {
+    color: #00ff85;
+}
+
+.negative {
+    color: #ff4b4b;
+}
+
+.price {
+    font-size: 1.6rem;
+    font-weight: bold;
+    margin: 1rem 0;
+}
+
+.button {
+    background: linear-gradient(90deg, #a44ef2, #1279f8);
+    border: none;
+    border-radius: 20px;
+    color: white;
+    padding: 0.6rem 1rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: box-shadow 0.3s ease-out;
+}
+
+.button:hover {
+    box-shadow: 0 0 16px rgba(131, 77, 242, 0.6), 0 0 32px rgba(18, 121, 248, 0.4);
+}
+
+.scrollWrapper {
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding-bottom: 1rem;
+}
+
+
+

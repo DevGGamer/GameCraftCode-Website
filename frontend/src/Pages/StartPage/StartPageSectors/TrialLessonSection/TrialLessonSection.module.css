@@ -1,3 +1,100 @@
 #trial_lesson_section {
-    
+    display: flex;
+    align-items: center;
+}
+
+.container {
+    max-width: 1920px;
+    width: 100%;
+    padding: 64px 192px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: stretch;
+    gap: 2rem;
+    color: white;
+}
+
+.formBox {
+    background-color: #0a0a24;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 16px;
+    padding: 2rem 1.5rem;
+    width: 100%;
+    max-width: 300px;
+    box-sizing: border-box;
+}
+
+.formTitle {
+    font-size: 1.2rem;
+    color: #00eaff;
+    margin-bottom: 1.2rem;
+    font-weight: bold;
+}
+
+.form {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.form input,
+.form select {
+    background-color: #0f0f2f;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 10px;
+    padding: 0.75rem;
+    color: white;
+    font-size: 0.95rem;
+}
+
+.form input::placeholder {
+    color: #cccccc;
+}
+
+.form button {
+    background: linear-gradient(90deg, #a44ef2, #1279f8);
+    border: none;
+    border-radius: 12px;
+    padding: 0.75rem;
+    color: white;
+    font-weight: bold;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: box-shadow 0.3s ease-out;
+}
+
+.form button:hover {
+    box-shadow: 0 0 16px rgba(131, 77, 242, 0.6), 0 0 32px rgba(18, 121, 248, 0.4);
+}
+
+.promoBox {
+    align-self: flex-end;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+}
+
+.promoTitle {
+    font-size: 2rem;
+    font-weight: bold;
+    margin-bottom: 2rem;
+    color: #00eaff;
+    border: 2px solid #00eaff;
+    display: inline-block;
+    padding: 0.5rem 2rem;
+    border-radius: 20px;
+}
+
+.promoText {
+    font-size: 1rem;
+    color: white;
+}
+
+.arrow {
+    margin-top: 2rem;
+    max-width: 100%;
+    width: 60%;
+    height: auto;
 }
