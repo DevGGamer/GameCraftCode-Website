@@ -3,149 +3,126 @@
     justify-content: center;
 }
 
-.courses_section_wrapper {
+.courses_wrapper {
     max-width: 1920px;
     width: 100%;
     padding: 64px 192px;
 }
 
-.courses_section_head {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-end;
-    margin-bottom: 2rem;
+.courses_section_header {
+    position: relative;
+    height: 200px;
 }
 
-.about_section_header {
+.courses_section_header h2 {
+    position: absolute;
+    right: 0;
     color: #00D9FF;
-    font-size: 64px;
+    font-size: 82px;
     font-weight: 700;
     text-align: center;
-    padding: 4px 32px 8px 32px;
+    padding: 16px 32px;
     border: 2px solid #00D9FF;
     border-radius: 40px;
     display: inline-block;
     box-shadow: 0 0 12px rgba(0, 217, 255, 0.6);
     background-color: #05062E;
-    margin: 0px;
+    margin: 0;
 }
 
 .filterButtons {
-    display: flex;
-    gap: 1rem;
+  display: flex;
+  gap: 21px;
 }
 
-.filterButton {
-    padding: 0.5rem 1.5rem;
-    min-width: 211px;
-    height: 64px;
-    border: 1px solid transparent;
-    border-radius: 32px;
-    background-image:
-        linear-gradient(#000000, #000000),
-        linear-gradient(#834DF2 0%, #1279F8 100%);
-    background-origin: border-box;
-    background-clip: padding-box, border-box;
-    color: white;
-    font-size: 24px;
-    font-weight: bold;
+.filterButtons  button {
+    color: #FFFFFF;
+    font-size: 32px;
+    font-weight: 700;
+    text-align: center;
+    padding: 16px 32px;
+    border: 2px solid #00D9FF;
+    border-radius: 40px;
+    display: inline-block;
+    box-shadow: 0 0 12px rgba(0, 217, 255, 0.6);
+    background-color: #0D0D0D;
+    margin: 0;
+    margin-top: 41px;
     cursor: pointer;
-    transition: background-image 0.5s ease-in-out;
 }
 
-.filterButton:hover,
-.filterButton.active {
-    background-image:
-        linear-gradient(#262626, #262626),
-        linear-gradient(#834DF2 0%, #1279F8 100%);
+.filterButtons button.active {
+  background-color: #262626;
 }
 
-
-
-.courseGrid {
-    display: flex;
-    flex-direction: row;
-    flex-wrap: wrap;
-    justify-content: space-between;
-    gap: 64px;
+.courses_container {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  column-gap: 128px;
+  row-gap: 64px;   
+  margin: 0 auto;
 }
 
-.courseCard {
-    border: 1px solid transparent;
-    background-image:
-        linear-gradient(#00071F, #00071F),
-        linear-gradient(#834DF2 0%, #1279F8 100%);
-    background-origin: border-box;
-    background-clip: padding-box, border-box;
-    border-radius: 36px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    min-width: 704px;
-    max-width: 704px;
-    min-height: 384px;
+.course_card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: relative;
+  width: 664px;
+  height: 244px;
+  background-color: #00071F;
+  border: 2px solid #00D9FF;
+  border-radius: 36px;
+  color: white;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 
-.courseTitle {
-    font-size: 1.5rem;
-    font-weight: bold;
-    margin-bottom: 1rem;
+.course_card:hover {
+  transform: scale(1.03);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.4);
 }
 
-.blue {
-    color: #00eaff;
+.course_img_wrapper {
+  flex-shrink: 0;
 }
 
-.purple {
-    color: #c082ff;
+.course_img_wrapper img {
+  width: 279px;
+  height: 279px;
 }
 
-.courseImage {
-    width: 64px;
-    height: 64px;
-    margin-bottom: 1rem;
+.course_info {
+  display: flex;
+  flex-direction: column;
+  margin-left: 64px;
 }
 
-.detailsButton {
-    background: none;
-    border: 1px solid #00eaff;
-    border-radius: 20px;
-    padding: 8px 11px 8px 18px;
-    color: #ffffff;
-    cursor: pointer;
-    font-size: 20px;
-    transition: background 0.3s;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    min-width: 298px;
+.course_info h3 {
+    font-size: 64px;
+    font-weight: 700;
+    margin: 0;
+}
+
+.course_card:nth-child(4n+1) h3,
+.course_card:nth-child(4n+4) h3 {
+  color: #00e0ff;
+}
+
+.course_card:nth-child(4n+2) h3,
+.course_card:nth-child(4n+3) h3 {
+  color: #AA47FD;
+}
+
+.course_info button {
+    width: 298px;
     height: 41px;
-    max-height: 41px;
-}
-
-.detailsButton:hover {
-    background-color: #00eaff;
-    color: #0b0b2e;
-}
-
-.detailsButtonImage {
-    border-radius: 32px;
-    width: 25px;
-    height: 25px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-.detailsButtonImage img {
-    width: 19px;
-    height: auto;
-}
-
-.purple_bg {
-    background-color: #c082ff;
-}
-
-.blue_bg {
-    background-color: #00eaff;
+    border: 2px solid #00D9FF;
+    border-radius: 40px;
+    font-size: 20px;
+    font-weight: 400;
+    color: #FFFFFF;
+    background-color: #00071F;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    margin-top: 5px;
 }

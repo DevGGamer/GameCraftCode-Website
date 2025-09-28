@@ -1,100 +1,113 @@
 #trial_lesson_section {
     display: flex;
-    align-items: center;
+    justify-content: center;
 }
 
-.container {
+.trial_lesson_wrapper {
     max-width: 1920px;
     width: 100%;
-    padding: 64px 192px;
-    margin: 0 auto;
+    padding: 64px 100px;
     display: flex;
-    justify-content: space-between;
-    align-items: stretch;
-    gap: 2rem;
-    color: white;
+    justify-content: center;
+    align-items: flex-start;
+    gap: 120px;
 }
 
-.formBox {
-    background-color: #0a0a24;
-    border: 1px solid rgba(255, 255, 255, 0.15);
-    border-radius: 16px;
-    padding: 2rem 1.5rem;
+.trial_lesson_form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 630px;
+    border: 2px solid #00D9FF;
+    border-radius: 18px;
+    padding: 27px;
+}
+
+.trial_lesson_form h3 {
+    color: #00D9FF;
+    font-size: 40px;
+    font-weight: 700px;
+    margin: 0;
+    margin-bottom: 44px;
+}
+
+.trial_lesson_form form {
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
     width: 100%;
-    max-width: 300px;
-    box-sizing: border-box;
+    gap: 29px;
 }
 
-.formTitle {
-    font-size: 1.2rem;
-    color: #00eaff;
-    margin-bottom: 1.2rem;
-    font-weight: bold;
+.trial_lesson_form input,
+.trial_lesson_form select {
+    font-size: 36px;
+    font-weight: 400px;
+    background: transparent;
+    border: 1px solid #00D9FF;
+    border-radius: 24px;
+    padding: 10px 0 10px 25px;
+    color: rgb(148, 148, 148);
+    outline: none;
 }
 
-.form {
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
+.trial_lesson_form input::placeholder {
+    color: #aaa;
 }
 
-.form input,
-.form select {
-    background-color: #0f0f2f;
-    border: 1px solid rgba(255, 255, 255, 0.15);
-    border-radius: 10px;
-    padding: 0.75rem;
-    color: white;
-    font-size: 0.95rem;
+.trial_lesson_form select {
+    color: #aaa;
 }
 
-.form input::placeholder {
-    color: #cccccc;
-}
-
-.form button {
-    background: linear-gradient(90deg, #a44ef2, #1279f8);
+.trial_lesson_form button {
+    background: linear-gradient(90deg, #8a2be2, #1e90ff);
     border: none;
-    border-radius: 12px;
-    padding: 0.75rem;
+    border-radius: 18px;
+    padding: 12px;
     color: white;
-    font-weight: bold;
-    font-size: 1rem;
+    font-size: 36px;
+    font-weight: 700px;
     cursor: pointer;
-    transition: box-shadow 0.3s ease-out;
+    margin-top: 8px;
+    transition: opacity 0.2s;
 }
 
-.form button:hover {
-    box-shadow: 0 0 16px rgba(131, 77, 242, 0.6), 0 0 32px rgba(18, 121, 248, 0.4);
+.trial_lesson_form button:hover {
+    opacity: 0.9;
 }
 
-.promoBox {
-    align-self: flex-end;
-    text-align: center;
+.trial_lesson_text {
+    flex: 1;
     display: flex;
     flex-direction: column;
-    justify-content: flex-end;
-}
-
-.promoTitle {
-    font-size: 2rem;
-    font-weight: bold;
-    margin-bottom: 2rem;
-    color: #00eaff;
-    border: 2px solid #00eaff;
-    display: inline-block;
-    padding: 0.5rem 2rem;
-    border-radius: 20px;
-}
-
-.promoText {
-    font-size: 1rem;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
     color: white;
+    position: relative;
 }
 
-.arrow {
-    margin-top: 2rem;
-    max-width: 100%;
-    width: 60%;
-    height: auto;
+.trial_lesson_text h2 {
+    font-size: 64px;
+    font-weight: 700px;
+    color: #00cfff;
+    border: 1px solid #00cfff;
+    border-radius: 48px;
+    padding: 12px 20px;
+    display: inline-block;
+    margin-bottom: 12px;
+}
+
+.trial_lesson_text p {
+    font-size: 36px;
+    font-weight: 400px;
+}
+
+.trial_lesson_text svg {
+    position: absolute;
+    top: 95%;
+    left: 50%; 
+    transform: translateX(-50%);
+    width: 720px;
+    height: 580px;
 }

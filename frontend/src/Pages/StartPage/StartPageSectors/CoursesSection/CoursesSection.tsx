@@ -1,116 +1,70 @@
 import React, { useState } from "react";
-import styles from "./CoursesSection.module.css";
-import classNames from "classnames";
-import Polygon from '../../../../Images/StartPage/Polygon.png'
+import styles from './CoursesSection.module.css';
+import Python from '../../../../Images/StartPage/Python.png';
+import Unity from '../../../../Images/StartPage/Unity.png';
+import Minecraft from '../../../../Images/StartPage/Minecraft.png';
+import Roblox from '../../../../Images/StartPage/Roblox.png';
+import Scratch from '../../../../Images/StartPage/Scratch.png';
 
-type AgeGroup = "all" | "8-10" | "11-15";
-
-interface Course {
-    title: string;
-    image: string;
-    ageGroups: AgeGroup[];
-    themeColor: "blue" | "purple";
-}
+type Course = {
+  id: number;
+  title: string;
+  icon: string;
+  ageGroup: "8-10" | "11-15";
+};
 
 const courses: Course[] = [
-    {
-        title: "Python",
-        image: "/images/python.png",
-        ageGroups: ["11-15"],
-        themeColor: "blue",
-    },
-    {
-        title: "Unity",
-        image: "/images/unity.png",
-        ageGroups: ["11-15"],
-        themeColor: "purple",
-    },
-    {
-        title: "Minecraft",
-        image: "/images/minecraft.png",
-        ageGroups: ["8-10", "11-15"],
-        themeColor: "purple",
-    },
-    {
-        title: "Roblox",
-        image: "/images/roblox.png",
-        ageGroups: ["8-10", "11-15"],
-        themeColor: "blue",
-    },
-    {
-        title: "Scratch",
-        image: "/images/scratch.png",
-        ageGroups: ["8-10"],
-        themeColor: "blue",
-    },
+  { id: 1, title: "Python", icon: Python, "ageGroup": "11-15" },
+  { id: 2, title: "Unity", icon: Unity, "ageGroup": "11-15" },
+  { id: 3, title: "Minecraft", icon: Minecraft, "ageGroup": "8-10" },
+  { id: 4, title: "Roblox", icon: Roblox, "ageGroup": "8-10" },
+  { id: 5, title: "Scratch", icon: Scratch, "ageGroup": "8-10" },
 ];
 
 const CoursesSection: React.FC = () => {
-    const [selectedAge, setSelectedAge] = useState<AgeGroup>("all");
+    const [activeFilter, setActiveFilter] = useState<"all" | "8-10" | "11-15">("all");
+
+    const filterButtons: { label: string; value: "all" | "8-10" | "11-15" }[] = [
+        { label: "Все курсы", value: "all" },
+        { label: "8-10 лет", value: "8-10" },
+        { label: "11-15 лет", value: "11-15" },
+    ];
 
     const filteredCourses =
-        selectedAge === "all"
+        activeFilter === "all"
             ? courses
-            : courses.filter((course) => course.ageGroups.includes(selectedAge));
+            : courses.filter(course => course.ageGroup === activeFilter);
 
     return (
         <section id={styles.courses_section}>
-            <div className={styles.courses_section_wrapper}>
-                <div className={styles.courses_section_head}>
+            <div className={styles.courses_wrapper}>
+                <div className={styles.courses_section_header}>
+                    <h2>КУРСЫ</h2>
                     <div className={styles.filterButtons}>
+                        {filterButtons.map((btn) => (
                         <button
-                            onClick={() => setSelectedAge("all")}
-                            className={classNames(styles.filterButton, {
-                                [styles.active]: selectedAge === "all",
-                            })}
+                            key={btn.value}
+                            className={activeFilter === btn.value ? styles.active : ""}
+                            onClick={() => setActiveFilter(btn.value)}
                         >
-                            Все курсы
+                            {btn.label}
                         </button>
-                        <button
-                            onClick={() => setSelectedAge("8-10")}
-                            className={classNames(styles.filterButton, {
-                                [styles.active]: selectedAge === "8-10",
-                            })}
-                        >
-                            8-10 лет
-                        </button>
-                        <button
-                            onClick={() => setSelectedAge("11-15")}
-                            className={classNames(styles.filterButton, {
-                                [styles.active]: selectedAge === "11-15",
-                            })}
-                        >
-                            11-15 лет
-                        </button>
+                        ))}
                     </div>
-                    <h2 className={styles.about_section_header}>КУРСЫ</h2>        
                 </div>
-
-                <div className={styles.courseGrid}>
+                <div className={styles.courses_container}>
                     {filteredCourses.map((course) => (
-                        <div key={course.title} className={styles.courseCard}>
-                            <div
-                                className={classNames(styles.courseTitle, {
-                                    [styles.blue]: course.themeColor === "blue",
-                                    [styles.purple]: course.themeColor === "purple",
-                                })}
-                            >
-                                {course.title}
+                        <div key={course.id} className={styles.course_card}>
+
+                            <div className={styles.course_info}>
+                                <h3>{course.title}</h3>
+                                <button>Подробнее про курс </button>
                             </div>
-                            <img
-                                src={course.image}
-                                alt={course.title}
-                                className={styles.courseImage}
-                            />
-                            <button className={styles.detailsButton}>
-                                Подробнее про курс
-                                <div className={classNames(styles.detailsButtonImage, {
-                                    [styles.blue_bg]: course.themeColor === "blue",
-                                    [styles.purple_bg]: course.themeColor === "purple",
-                                })}>
-                                    <img src={Polygon} alt="" />
-                                </div>
-                            </button>
+
+                            <div className={styles.course_img_wrapper}>
+                                <img src={course.icon} alt={course.title} />
+                            </div>
+
                         </div>
                     ))}
                 </div>
