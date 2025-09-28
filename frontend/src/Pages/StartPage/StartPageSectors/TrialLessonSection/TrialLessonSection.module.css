@@ -1,3 +1,113 @@
 #trial_lesson_section {
-    
+    display: flex;
+    justify-content: center;
+}
+
+.trial_lesson_wrapper {
+    max-width: 1920px;
+    width: 100%;
+    padding: 64px 100px;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    gap: 120px;
+}
+
+.trial_lesson_form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 630px;
+    border: 2px solid #00D9FF;
+    border-radius: 18px;
+    padding: 27px;
+}
+
+.trial_lesson_form h3 {
+    color: #00D9FF;
+    font-size: 40px;
+    font-weight: 700px;
+    margin: 0;
+    margin-bottom: 44px;
+}
+
+.trial_lesson_form form {
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+    width: 100%;
+    gap: 29px;
+}
+
+.trial_lesson_form input,
+.trial_lesson_form select {
+    font-size: 36px;
+    font-weight: 400px;
+    background: transparent;
+    border: 1px solid #00D9FF;
+    border-radius: 24px;
+    padding: 10px 0 10px 25px;
+    color: rgb(148, 148, 148);
+    outline: none;
+}
+
+.trial_lesson_form input::placeholder {
+    color: #aaa;
+}
+
+.trial_lesson_form select {
+    color: #aaa;
+}
+
+.trial_lesson_form button {
+    background: linear-gradient(90deg, #8a2be2, #1e90ff);
+    border: none;
+    border-radius: 18px;
+    padding: 12px;
+    color: white;
+    font-size: 36px;
+    font-weight: 700px;
+    cursor: pointer;
+    margin-top: 8px;
+    transition: opacity 0.2s;
+}
+
+.trial_lesson_form button:hover {
+    opacity: 0.9;
+}
+
+.trial_lesson_text {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    color: white;
+    position: relative;
+}
+
+.trial_lesson_text h2 {
+    font-size: 64px;
+    font-weight: 700px;
+    color: #00cfff;
+    border: 1px solid #00cfff;
+    border-radius: 48px;
+    padding: 12px 20px;
+    display: inline-block;
+    margin-bottom: 12px;
+}
+
+.trial_lesson_text p {
+    font-size: 36px;
+    font-weight: 400px;
+}
+
+.trial_lesson_text svg {
+    position: absolute;
+    top: 95%;
+    left: 50%; 
+    transform: translateX(-50%);
+    width: 720px;
+    height: 580px;
 }
