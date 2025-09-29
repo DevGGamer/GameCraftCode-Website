@@ -1,5 +1,6 @@
 import React from "react";
-import styles from './PriceSection.module.css';
+import styles from "./PriceSection.module.css";
+import classNames from "classnames";
 
 type Plan = {
   id: number;
