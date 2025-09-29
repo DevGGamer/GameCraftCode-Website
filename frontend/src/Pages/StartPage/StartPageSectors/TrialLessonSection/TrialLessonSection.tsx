@@ -1,5 +1,6 @@
 import React from "react";
 import styles from './TrialLessonSection.module.css';
+import ArrowImage from '../../../../Images/StartPage/Arrow.png'
 
 const TrialLessonSection: React.FC = () => {
     return (
