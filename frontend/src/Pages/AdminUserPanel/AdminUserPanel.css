@@ -1,0 +1,263 @@
+.admin-panel {
+    padding: 16px;
+    background: #000;
+    color: #fff;
+    box-shadow: 0 0 15px rgba(255, 255, 255, 0.2);
+    height: 100%;
+    border-radius: 10px;
+  }
+  
+  .add-user-button {
+    padding: 12px 18px;
+    font-size: 16px;
+    cursor: pointer;
+    border-radius: 10px;
+    background-color: #0a0a0a;
+    color: #00f0ff;
+    border: 2px solid #00f0ff;
+    box-shadow: 0 0 8px rgba(0, 240, 255, 0.3);
+    transition: all 0.3s ease-in-out;
+    text-align: center;
+    font-family: 'PixelFont', sans-serif;
+    margin-bottom: 16px;
+  }
+
+  .add-user-button:hover {
+    background-color: #00f0ff;
+    color: #000;
+    transform: scale(1.02);
+    box-shadow: 0 0 12px #00f0ff;
+  }
+  
+  .table-container {
+    overflow-y: auto;
+    max-height: 600px;
+    box-shadow: 0 0 8px #00ffff, 0 0 16px #00ffff;
+  }
+  
+  .user-table {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: #111827;
+    border: 2px solid #00ffff;
+
+    color: #fff;
+    text-align: left;
+  }
+  
+  .user-table th, .user-table td {
+    border: 1px solid #444;
+    padding: 8px;
+    position: relative;
+  }
+  
+  .user-table input,
+  .user-table select {
+    background: #222;
+    color: #fff;
+    border: 1px solid #444;
+    padding: 5px;
+    width: 100%;
+  }
+  
+  .save-button {
+    margin-right: 8px;
+    margin-bottom: 5px;
+    padding: 5px 10px;
+    background: #00e676;
+    color: #000;
+    box-shadow: 0 0 10px #00e676aa;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+
+  .course-button {
+    margin-right: 8px;
+    margin-bottom: 5px;
+    padding: 5px 10px;
+    background: #007bff;
+    color: #fff;
+    box-shadow: 0 0 10px #007bff80;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+  
+  .delete-button {
+    padding: 5px 10px;
+    background: #ff1744;
+    color: #fff;
+    box-shadow: 0 0 10px #ff174480;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-bottom: 5px;
+  }
+
+  .toggle-password {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: pointer;
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator {
+  filter: invert(1);
+  cursor: pointer;
+}
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal {
+  background: #111;
+  color: white;
+  padding: 24px;
+  border-radius: 12px;
+  min-width: 400px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 0 8px #00ffff, 0 0 16px #00ffff;
+}
+
+.course-select {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+  align-items: center;
+}
+
+.course-select select {
+  flex: 1;
+  background-color: #0a0a0a;
+  color: #00f0ff;
+  box-shadow: 0 0 8px rgba(0, 240, 255, 0.3);
+  border: 1px solid #00f0ff;
+  padding: 8px;
+  border-radius: 6px;
+}
+
+.course-select button {
+  background: #00e676;
+  color: #000;
+  box-shadow: 0 0 10px #00e676aa;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  height: 100%;
+  transition: background-color 0.2s;
+}
+
+.course-select button:hover {
+  background-color: #02da72;
+}
+
+.assigned-courses {
+  margin-top: 16px;
+}
+
+.course-pill {
+  background: #222;
+  padding: 10px 12px;
+  margin-bottom: 10px;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  color: white;
+  border: 1px solid #00f0ff;
+  box-shadow: 0 0 1px #00ffff, 0 0 4px #00ffff;
+}
+
+.course-pill div {
+  width: 100%;
+  margin-bottom: 15px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.course-pill .course-select {
+  margin-bottom: 0px;
+}
+
+.course-pill button {
+  background: #ff1744;
+  color: #fff;
+  box-shadow: 0 0 10px #ff174480;
+  border: none;
+  padding: 6px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  margin-left: 10px;
+}
+
+.course-pill button:hover {
+  background-color: #ff1f4c;
+}
+
+.modal-close-button {
+  background: transparent;
+  color: #00ffff;
+  border: 2px solid #00ffff;
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  width: 100%;
+  box-shadow: 0 0 2px #00ffff, 0 0 8px #00ffff;
+  transition: all 0.3s ease-in-out;
+}
+
+.modal-close-button:hover {
+  background-color: #00ffff;
+  color: #000000;
+  box-shadow: 0 0 4px #00ffff, 0 0 16px #00ffff;
+}
+
+.filters {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.filter-input,
+.filter-select {
+  padding: 12px 18px;
+  font-size: 16px;
+  border-radius: 10px;
+  background-color: #0a0a0a;
+  color: #00f0ff;
+  box-shadow: 0 0 8px rgba(0, 240, 255, 0.3);
+  border: 1px solid #00f0ff;
+  flex: 1;
+}
+
+.filter-select {
+  max-width: 220px;
+}
+
+@media (max-width: 768px)
+{
+  .filter-select {
+    width: 100%;
+  }
+
+  .desktop-display {
+    display: none;
+  }
+}
