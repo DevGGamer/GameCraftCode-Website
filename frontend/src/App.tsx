@@ -9,11 +9,13 @@ import CoursesPage from './Pages/CoursesPage/CoursesPage';
 import EducationPage from './Pages/EducationPage/EducationPage';
 import Unauthorized from './Pages/Unauthorized/Unauthorized';
 import StudentsPage from './Pages/StudentsPage/StudentsPage';
+import BodyClassHandler from './Body-Class';
 import './App.css'
 
 function App() {
   return (
      <BrowserRouter>
+     <BodyClassHandler />
       <Routes>
         <Route path="/" element={<StartPage />} />
         <Route path="/login" element={<Login />} />

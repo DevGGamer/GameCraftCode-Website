@@ -1,19 +1,5 @@
 @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
 
-*, ::after, ::before {
- box-sizing: border-box;
-}
-
-body {
-  display: flex;
-  justify-content: center;
-  margin: 0px;
-  font-family: 'Press Start 2P', cursive;
-  background-color: #1f2a40;
-  color: #ffffff;
-}
-
-
 .page-container {
     display: flex;
     justify-content: flex-end;
