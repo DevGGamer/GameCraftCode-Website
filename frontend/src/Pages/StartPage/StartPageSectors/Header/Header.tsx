@@ -1,4 +1,5 @@
 import React from "react";
+import { Link } from "react-router-dom";
 import styles from './Header.module.css';
 import TrialLessonButton from "../../../../Components/TrialLessonButton/TrialLessonButton";
 
@@ -14,7 +15,7 @@ const Header: React.FC = () => {
                         <li><a href="#about_section" className={styles.selected}>О нас</a></li>
                         <li><a href="">Курсы</a></li>
                         <li><a href="">Тарифы</a></li>
-                        <li><a href="">Личный кабинет</a></li>
+                        <li><Link to="/login">Личный кабинет</Link></li>
                         <li>
                             <TrialLessonButton className={styles.trial_lesson_button}/>
                         </li>
