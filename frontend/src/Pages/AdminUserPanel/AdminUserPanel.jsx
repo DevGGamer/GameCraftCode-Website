@@ -13,7 +13,7 @@ const defaultUser = {
   password: '',
   name: '',
   surname: '',
-  datebirth: null,
+  birth_date: null,
   email: '',
   phone: '',
   role: 'student',
@@ -26,6 +26,10 @@ function AdminUserPanel() {
   const [users, setUsers] = useState([]);
   const [teachers, setTeachers] = useState([]);
   const [showPasswords, setShowPasswords] = useState({});
+
+  const [showAddUser, setShowAddUser] = useState(false);
+  const [formData, setFormData] = useState({ login: "", password: "", name: "",
+    surname: "", email: "", role: "", phone: "", birth_date: "" });
 
   const [showModal, setShowModal] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
@@ -46,13 +50,13 @@ function AdminUserPanel() {
 
   const fetchUsers = async () => {
     const res = await axios.get(API_URL);
-    setUsers(res.data.users);
+    setUsers(res.data);
   };
 
   const fetchTeachers = async () => {
-    await axios.get(`${host_name}:8080/api/users/role/${"teacher"}`)
+    await axios.get(`${host_name}:8000/api/teachers`)
     .then ((res) => {
-      setTeachers(res.data.users);
+      setTeachers(res.data);
     })
     .catch((error) => {
       console.error("Login error:", error);
@@ -89,24 +93,41 @@ function AdminUserPanel() {
     fetchUsers();
   };
 
-  const handleAddUser = async () => {
-    await axios.post(API_URL, defaultUser);
+  const handleAddUser = async (e) => {
+    e.preventDefault();
+
+     try {
+    const response = await axios.post(`${host_name}:8000/api/add_user`, formData, {
+      headers: { "Content-Type": "application/json" },
+    });
+
+    alert(`Успешно отправлено: ${JSON.stringify(response.data)}`);
+
+    setShowPasswords(false);
+    setFormData({ login: "", password: "", name: "",
+    surname: "", email: "", role: "", phone: "", birth_date: "" });
+  } catch (err) {
+    alert(`Ошибка сервера: ${JSON.stringify(err.response.data)}`);
+    console.error(err);
+  }
     fetchUsers();
   };
 
   const fetchAllCourses = async () => {
-    const res = await axios.get(`${host_name}:8080/api/courses`);
-    setAllCourses(res.data.courses);
+    const res = await axios.get(`${host_name}:8000/api/courses`, {
+                      headers: { Authorization: `Bearer ${localStorage.token}`} });
+    setAllCourses(res.data);
   };
   
   const fetchUserCourses = async (userId) => {
-    const res = await axios.get(`${host_name}:8080/api/user/${userId}/courses`);
-    setUserCourses(res.data.courses);
+    const res = await axios.get(`${host_name}:8000/api/user_course/${userId}`, {
+                      headers: { Authorization: `Bearer ${localStorage.token}`} });
+    setUserCourses(res.data);
   };
 
   const fetchUserTeacher = async (userID, courseID) => {
     try {
-      const res = await axios.get(`${host_name}:8080/api/course-relations/${courseID}/${userID}`);
+      const res = await axios.get(`${host_name}:8000/api/course-relations/${courseID}/${userID}`);
       const teacherId = res.data.partner.id;
   
       setCourseTeachers(prev => ({
@@ -131,32 +152,25 @@ function AdminUserPanel() {
   
   const handleAddCourse = async () => {
     if (!selectedCourseId) return;
-    await axios.post(`${host_name}:8080/api/user/${selectedUser.id}/courses`, {
-      courseId: selectedCourseId
-    });
+    const course = selectedCourseId.replace(/\//g, ">");
+    await axios.get(`${host_name}:8000/api/add_user_course_and_teacher/${selectedUser.id}/${course}/${selectedTeacherId}`, {
+                      headers: { Authorization: `Bearer ${localStorage.token}`} });
     setSelectedCourseId('');
+    setSelectedTeacherId('');
     await fetchUserCourses(selectedUser.id);
   };
   
   const handleRemoveCourse = async (courseId) => {
-    await axios.delete(`${host_name}:8080/api/user/${selectedUser.id}/courses/${courseId}`);
+    await axios.delete(`${host_name}:8000/api/user/${selectedUser.id}/courses/${courseId}`);
     await fetchUserCourses(selectedUser.id);
   };
 
-  const handleTeacherChange = async (teacher_id, course_id) => {
-    if (!course_id || !teacher_id) return;
-  
+  const handleTeacherChange = async (teacher_id) => {
+    if (!teacher_id) return;
     try {
-      await axios.post(`${host_name}:8080/api/course-relations`, {
-        teacher_id,
-        student_id: selectedUser.id,
-        course_id
-      });
+      await axios.get(`${host_name}:8000/api/add_user_course_or_teacher/${selectedUser.id}/${teacher_id}`, {
+                      headers: { Authorization: `Bearer ${localStorage.token}`} });
   
-      setCourseTeachers(prev => ({
-        ...prev,
-        [course_id]: teacher_id
-      }));
     } catch (error) {
       console.error("Ошибка при обновлении преподавателя:", error);
     }
@@ -204,9 +218,104 @@ const filteredUsers = users.filter(user => {
 
   return (
     <div className="admin-panel">
-      <button onClick={handleAddUser} className="add-user-button">
+      <button onClick={() => setShowAddUser(!showAddUser)} className="add-user-button">
         Добавить пользователя
       </button>
+      {showAddUser && (
+        <form
+          onSubmit={handleAddUser}
+          className="mt-4 p-4 border rounded shadow-md w-80"
+        >
+          <label className="block mb-2">
+            Логин:
+            <input
+              type="text"
+              className="w-full border p-1 mt-1 rounded"
+              value={formData.login}
+              onChange={(e) => setFormData({ ...formData, login: e.target.value })}
+              required
+            />
+          </label>
+          <label className="block mb-2">
+            Пароль:
+            <input
+              type="text"
+              className="w-full border p-1 mt-1 rounded"
+              value={formData.password}
+              onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+              required
+            />
+          </label>
+          <label className="block mb-2">
+            Имя:
+            <input
+              type="text"
+              className="w-full border p-1 mt-1 rounded"
+              value={formData.name}
+              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+              required
+            />
+          </label>
+          <label className="block mb-2">
+            Фмилия:
+            <input
+              type="text"
+              className="w-full border p-1 mt-1 rounded"
+              value={formData.surname}
+              onChange={(e) => setFormData({ ...formData, surname: e.target.value })}
+              required
+            />
+          </label>
+          <label className="block mb-2">
+            Email:
+            <input
+              type="text"
+              className="w-full border p-1 mt-1 rounded"
+              value={formData.email}
+              onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+              required
+            />
+          </label>
+          <label className="block mb-2">
+            Роль:
+            <input
+              type="text"
+              className="w-full border p-1 mt-1 rounded"
+              value={formData.role}
+              onChange={(e) => setFormData({ ...formData, role: e.target.value })}
+              required
+            />
+          </label>
+          <label className="block mb-2">
+            Телефон:
+            <input
+              type="text"
+              className="w-full border p-1 mt-1 rounded"
+              value={formData.phone}
+              onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+              required
+            />
+          </label>
+          <label className="block mb-2">
+            Дата рождения:
+            <input
+              type="date"
+              className="w-full border p-1 mt-1 rounded"
+              value={formData.birth_date}
+              onChange={(e) => setFormData({ ...formData, birth_date: e.target.value })}
+              required
+            />
+          </label>
+          <div className="flex justify-end gap-2 mt-3">
+            <button
+              type="submit"
+              className="bg-green-600 text-white px-3 py-1 rounded"
+            >
+              Отправить
+            </button>
+          </div>
+        </form>
+      )}
       <div className="filters">
         <input
           type="text"
@@ -239,7 +348,14 @@ const filteredUsers = users.filter(user => {
                     {allCourses
                       .filter(c => !userCourses.find(uc => uc.id === c.id))
                       .map(course => (
-                        <option key={course.id} value={course.id}>{course.name}</option>
+                        <option key={course.name} value={course.name}>{course.name}</option>
+                    ))}
+                  </select>
+                  <select value={selectedTeacherId} onChange={(e) => setSelectedTeacherId(e.target.value)}>
+                    <option value="">Выберите преподавателя</option>
+                    {teachers
+                      .map(teacher => (
+                        <option key={teacher.id} value={teacher.id}>{teacher.name} {teacher.surname}</option>
                     ))}
                   </select>
                   <button onClick={handleAddCourse}>Добавить</button>
@@ -249,19 +365,11 @@ const filteredUsers = users.filter(user => {
                   {userCourses.map((course) => (
                     <div key = {course.id} className="course-pill">
                       <div>
-                        <span>{course.name}</span>
+                        <span>{course[0]}</span>
+                        <span>{course[1]}</span>
                         <button onClick={() => handleRemoveCourse(course.id)}>Удалить</button>
                       </div>
-                      <div className="course-select">
-                        <select value={courseTeachers[course.id]} onChange={(e) => handleTeacherChange(e.target.value, course.id)}>
-                          <option value="">Выберите преподавателя</option>
-                          {teachers
-                            .map(teacher => (
-                              <option key={teacher.id} value={teacher.id}>{teacher.name} {teacher.surname}</option>
-                          ))}
-                        </select>
-                      </div>
-                      </div>
+                    </div>
                   ))}
                 </div>
               </>
@@ -300,7 +408,7 @@ const filteredUsers = users.filter(user => {
                 </td>
                 <td><input type="text" value={user.name} onChange={(e) => handleChange(index, 'name', e.target.value)} /></td>
                 <td><input type="text" value={user.surname} onChange={(e) => handleChange(index, 'surname', e.target.value)} /></td>
-                <td className='desktop-display'><input type="date" value={formatDate(user.datebirth)} onChange={(e) => handleChange(index, 'datebirth', e.target.value)} /></td>
+                <td className='desktop-display'><input type="date" value={formatDate(user.birth_date)} onChange={(e) => handleChange(index, 'birth_date', e.target.value)} /></td>
                 <td className='desktop-display'><input type="email" value={user.email} onChange={(e) => handleChange(index, 'email', e.target.value)} /></td>
                 <td className='desktop-display'><input type="tel" value={user.phone} onChange={(e) => handleChange(index, 'phone', e.target.value)} /></td>
                 <td>
