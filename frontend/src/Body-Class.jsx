@@ -5,10 +5,8 @@ function BodyClassHandler() {
   const location = useLocation();
 
   useEffect(() => {
-    // удаляем все возможные классы
-    document.body.classList.remove("start-page", "login-page");
+    document.body.classList.remove("landing", "platform");
     
-    // добавляем класс в зависимости от маршрута
     if (location.pathname === "/") {
       document.body.classList.add("landing");
     } else if (location.pathname === "/login") {
@@ -16,7 +14,7 @@ function BodyClassHandler() {
     }
   }, [location]);
 
-  return null; // компонент ничего не рендерит
+  return null;
 }
 
 export default BodyClassHandler;
