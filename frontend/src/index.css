@@ -11,3 +11,12 @@ body.landing {
   -moz-osx-font-smoothing: grayscale;
   background-color: #040531;
 }
+
+body.platform {
+  display: flex;
+  justify-content: center;
+  margin: 0px;
+  font-family: 'Press Start 2P', cursive;
+  background-color: #1f2a40;
+  color: #ffffff;
+}

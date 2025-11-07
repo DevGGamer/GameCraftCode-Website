@@ -15,12 +15,14 @@ function EducationPage() {
 
   useEffect(() => {
     const fetchCourses = async () => {
-      const res = await axios.get(`${host_name}:8000/api/user/${id}/courses`);
-      setCourses(res.data.courses);
+      const res = await axios.get(`${host_name}:8000/api/user_course/${id}`, {
+                      headers: { Authorization: `Bearer ${localStorage.token}`} });
+      setCourses(res.data);
+
     };
     fetchCourses();
   }, [id]);
-
+  
   const openCourseModal = async (course) => {
     setSelectedCourse(course);
     setExpandedLessonIndex(null);
@@ -38,14 +40,14 @@ function EducationPage() {
   const toggleLesson = (index) => {
     setExpandedLessonIndex(prev => (prev === index ? null : index));
   };
-
+  console.log(selectedCourse)
   return (
     <div className="student-courses-page">
       <div className="courses-grid">
         {courses.map(course => (
           <div key={course.id} className="education-course-card" onClick={() => openCourseModal(course)}>
             <img src={course.course_icon_path ? `${host_name}:8080${course.course_icon_path}`: "/default-course-image.png"} alt={course.name} />
-            <h3>{course.name}</h3>
+            <h3>{course.course_name}</h3>
           </div>
         ))}
       </div>

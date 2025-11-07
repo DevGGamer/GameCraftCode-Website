@@ -88,7 +88,7 @@ function Profile() {
                     </div>
                     <div className="profile-info">
                         <h3>Дата рождения</h3>
-                        <input type="date" value={userInfo === null || userInfo.datebirth === null ? "" : formatDate(userInfo.datebirth)} onChange={(e) => handleChange('datebirth', e.target.value)}/>
+                        <input type="date" value={userInfo === null || userInfo.birth_date === null ? "" : formatDate(userInfo.datebirth)} onChange={(e) => handleChange('datebirth', e.target.value)}/>
                     </div>
                     <div className="profile-info">
                         <h3>Роль</h3>
