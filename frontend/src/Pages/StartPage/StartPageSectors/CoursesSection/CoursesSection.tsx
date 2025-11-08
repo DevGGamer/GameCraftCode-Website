@@ -1,31 +1,56 @@
 import React, { useState } from "react";
-import styles from './CoursesSection.module.css';
-import Python from '../../../../Images/StartPage/Python.png';
-import Unity from '../../../../Images/StartPage/Unity.png';
-import Minecraft from '../../../../Images/StartPage/Minecraft.png';
-import Roblox from '../../../../Images/StartPage/Roblox.png';
-import Scratch from '../../../../Images/StartPage/Scratch.png';
+import styles from "./CoursesSection.module.css";
+import PythonIcon from "../../../../Images/CoursesIcons/Python.png";
+import UnityIcon from "../../../../Images/CoursesIcons/Unity.png";
+import ScratchIcon from "../../../../Images/CoursesIcons/Scratch.png";
+import RobloxIcon from "../../../../Images/CoursesIcons/Roblox.png";
+import MinecarftIcon from "../../../../Images/CoursesIcons/Minecraft.png";
 
-type Course = {
-  id: number;
+interface Course {
   title: string;
-  icon: string;
+  subtitle: string;
+  image: string;
   ageGroup: "8-10" | "11-15";
-};
+}
 
 const courses: Course[] = [
-  { id: 1, title: "Python", icon: Python, "ageGroup": "11-15" },
-  { id: 2, title: "Unity", icon: Unity, "ageGroup": "11-15" },
-  { id: 3, title: "Minecraft", icon: Minecraft, "ageGroup": "8-10" },
-  { id: 4, title: "Roblox", icon: Roblox, "ageGroup": "8-10" },
-  { id: 5, title: "Scratch", icon: Scratch, "ageGroup": "8-10" },
+  {
+    title: "Python",
+    subtitle: "От основ программирования до первого ИИ",
+    image: PythonIcon,
+    ageGroup: "11-15"
+  },
+  {
+    title: "Unity",
+    subtitle: "От первых скриптов до игр на витрине",
+    image: UnityIcon,
+    ageGroup: "11-15"
+  },
+  {
+    title: "Scratch",
+    subtitle: "От простых команд до креативных проектов",
+    image: ScratchIcon,
+    ageGroup: "8-10"
+  },
+  {
+    title: "Minecraft",
+    subtitle: "От пиксельных кубов до цифрового творчества",
+    image: MinecarftIcon,
+    ageGroup: "8-10"
+  },
+  {
+    title: "Roblox Studio",
+    subtitle: "От идей до первых заработков",
+    image: RobloxIcon,
+    ageGroup: "8-10"
+  },
 ];
 
 const CoursesSection: React.FC = () => {
     const [activeFilter, setActiveFilter] = useState<"all" | "8-10" | "11-15">("all");
 
     const filterButtons: { label: string; value: "all" | "8-10" | "11-15" }[] = [
-        { label: "Все курсы", value: "all" },
+        { label: "Все направления", value: "all" },
         { label: "8-10 лет", value: "8-10" },
         { label: "11-15 лет", value: "11-15" },
     ];
@@ -37,38 +62,31 @@ const CoursesSection: React.FC = () => {
 
     return (
         <section id={styles.courses_section}>
-            <div className={styles.courses_wrapper}>
-                <div className={styles.courses_section_header}>
-                    <h2>КУРСЫ</h2>
-                    <div className={styles.filterButtons}>
-                        {filterButtons.map((btn) => (
-                        <button
-                            key={btn.value}
-                            className={activeFilter === btn.value ? styles.active : ""}
-                            onClick={() => setActiveFilter(btn.value)}
-                        >
-                            {btn.label}
-                        </button>
-                        ))}
+        <div className={styles.filters}>
+            {
+                filterButtons.map((btn) => (
+                    <button className={`${styles.filter} ${activeFilter == btn.value ? styles.active : ""}`} onClick={() => setActiveFilter(btn.value)}>{btn.label}</button>
+                ))
+            }
+        </div>
+
+        <div className={styles.cards_container}>
+            {filteredCourses.map((course) => (
+            <div key={course.title} className={styles.course_card}>
+                <div className={styles.course_info_container}>
+                    <div className={styles.course_info}>
+                        <h3>{course.title}</h3>
+                        <p>{course.subtitle}</p>
                     </div>
+                    <img src={course.image} alt={course.title} className={styles.course_icon} />
                 </div>
-                <div className={styles.courses_container}>
-                    {filteredCourses.map((course) => (
-                        <div key={course.id} className={styles.course_card}>
-
-                            <div className={styles.course_info}>
-                                <h3>{course.title}</h3>
-                                <button>Подробнее про курс </button>
-                            </div>
-
-                            <div className={styles.course_img_wrapper}>
-                                <img src={course.icon} alt={course.title} />
-                            </div>
-
-                        </div>
-                    ))}
+                <div className={styles.course_buttons}>
+                <button className={styles.btn_secondary}>Подробнее</button>
+                <button className={styles.btn_primary}>Записаться</button>
                 </div>
             </div>
+            ))}
+        </div>
         </section>
     );
 };

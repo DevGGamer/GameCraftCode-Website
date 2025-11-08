@@ -12,6 +12,8 @@ const StartPage: React.FC = () =>
         <div className={styles.start_page_container}>
             <Header />
             <MainSection />
+            <CoursesSection />
+            <PriceSection />
         </div>
     )
 }
