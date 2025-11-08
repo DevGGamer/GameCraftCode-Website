@@ -1,62 +1,100 @@
 #main_section {
-    min-height: 900px;
-    background-image: url('../../../../Images/StartPage/MainSectionBG.png');
+    background-image: url("../../../../Images/StartPage/Background.png");
     background-repeat: no-repeat;
+    background-position: center;
     background-size: cover;
-    background-position: top;
+    height: 512px;
+    width: 100%;
     display: flex;
-    align-items: center;
     justify-content: center;
-    padding: 0 64px;
+    align-items: center;
 }
 
-.content_wrapper {
+.central_card_container {
     display: flex;
-    justify-content: space-between;
-    align-items: stretch;
-    max-width: 1440px;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    width: 85%;
+    max-width: 1075px;
+}
+
+.central_card {
+    padding: 48px 64px;
+    background-color: #F9FAFC;
+    border-radius: 32px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
     width: 100%;
 }
 
-.left_block {
-    color: white;
-    max-width: 900px;
-    position: relative;
+.central_card h1 {
+    font-size: 56px;
+    font-weight: bold;
+    color: #1E1B3A;
+    width: 100%;
+    text-align: center;
 }
 
-.left_block h1 {
-    font-size: 96px;
-    font-weight: 700;
-    line-height: 1.2;
-    color: #00D9FF;
-    margin-bottom: 40px;
-    margin-top: 0px;
+.central_card p {
+    font-size: 24px;
+    color: #1E1B3A;
+    width: 100%;
+    text-align: center;
 }
 
-.left_block p {
+#button {
+    padding: 18.5px 51px;
+}
+
+@media (max-width: 1345px)
+{
+.central_card h1 {
+    font-size: 42px;
+}
+
+.central_card p {
+    font-size: 24px;
+}
+}
+
+@media (max-width: 952px)
+{
+.central_card h1 {
     font-size: 36px;
-    color: #C69CFF;
-    margin-bottom: 40px;
-    max-width: 70%;
 }
 
-.right_block {
-    display: flex;
-    align-items: end;
-    position: absolute;
-    right: -650px;
-    top: 0%;
+.central_card p {
+    font-size: 18px;
 }
 
-.right_block .hero_image {
-    width: 100%;
-    max-width: 740px;
-    height: auto;
+.central_card {
+    padding: 48px 32px;
+}
 }
 
-.trial_lesson_button {
-    max-width: 640px;
-    max-height: 92px;
-    font-size: 32px;
-    padding: 25px 69px;
+@media (max-width: 430px)
+{
+.central_card_container
+{
+    width: 95%;
+}
+
+    .central_card h1 {
+    font-size: 18px;
+    }
+
+    .central_card p {
+        font-size: 10px;
+    }
+
+    .central_card {
+        padding: 48px 24px;
+    }
+
+#button {
+    padding: 12px 24px;
+}
 }

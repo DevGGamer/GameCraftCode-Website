@@ -2,21 +2,57 @@
   box-sizing: border-box;
 }
 
-body.landing {
-  margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  background-color: #040531;
-}
-
-body.platform {
+body {
   display: flex;
   justify-content: center;
+  font-family: 'Rubik', sans-serif;
+  font-size: 16px;
   margin: 0px;
-  font-family: 'Press Start 2P', cursive;
-  background-color: #1f2a40;
-  color: #ffffff;
+  padding: 0px;
+}
+
+button, .button {
+  padding: 12px 24px;
+  border-radius: 8px;
+  box-shadow: none;
+  min-height: 42px;
+  font-size: 16px;
+  transition: all 0.5s ease-out;
+  text-align: center;
+}
+
+.button:hover {
+  cursor: pointer;
+}
+
+.button-with-primary-color {
+  background-color: #6C30FF;
+  color: white;
+}
+
+.button-with-primary-color:hover {
+  background-color: #5c29db;
+  color: white;
+}
+
+.button-with-accent-color {
+  background-color: #6776FD;
+  color: white;
+}
+
+.button-with-accent-color:hover {
+  background: #2323e6;
+}
+
+button:hover,
+button:focus {
+  box-shadow: none;
+  outline: none;
+}
+
+h1, p, h2, h3 {
+  margin: 0px;
+  padding: 0px;
+  color: #1E1B3A;
+  text-shadow: none;
 }
