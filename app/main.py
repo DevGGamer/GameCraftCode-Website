@@ -147,9 +147,14 @@ async def submit_form(data: AddUserRequest, db: Session = Depends(get_db)):
     db.close()
     return {"status": "ok"}
 
-@app.get("/api/user/image")
-def get_user_image(payload: dict = Depends(verify_token)):
-    bucket_name = payload['login']
+@app.get("/api/user/image/")
+@app.get("/api/user/image/{id}")
+def get_user_image(id: Optional[int] = None, payload: dict = Depends(verify_token), db: Session = Depends(get_db)):
+    if (id is None):
+        bucket_name = payload['login']
+    else:
+        user = db.query(Users).filter(Users.id == id).first()
+        bucket_name = user.login
     object_name = "фото.jpg"
 
     # проверяем бакет и объект
@@ -194,21 +199,26 @@ def get_courses(payload: dict = Depends(verify_token)):
         
     return all_courses_data
 
+@app.get("/api/user_course/")
 @app.get("/api/user_course/{student_id}")
-def get_courses(student_id: int, payload: dict = Depends(verify_token), db: Session = Depends(get_db)):
+def get_courses(student_id: Optional[int] = None, payload: dict = Depends(verify_token), db: Session = Depends(get_db)):
+    if (student_id is None):
+        student_id = payload["id"]
     cours=[]
     courses = db.query(Courses).filter(Courses.student_id == student_id).all()
 
     for course in courses:
+        teacher = db.query(Users).filter(Users.id == course.teacher_id).first()
         objects = minio_client.list_objects("courses", prefix=course.course_name, recursive=True)
-
+        lessons = []
         for obj in objects:
             if obj.object_name.endswith(".mp4"):  # только видео
                 video_name = obj.object_name.split("/")[-1]
                 url = minio_client.presigned_get_object("courses", obj.object_name)
+                lessons.append( {"video_name": video_name, "video": url} )
 
-        c = {"course_name": course.course_name, "teacher_id": course.teacher_id, 
-        "video_name": video_name, "video": url}
+        c = {"course_name": course.course_name, "teacher_id": course.teacher_id, "teacher_name": teacher.name, "teacher_surname": teacher.surname,
+        "lessons": lessons}
         cours.append(c)
 
     return cours

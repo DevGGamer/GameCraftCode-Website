@@ -7,6 +7,7 @@ const host_name = 'http://localhost';
 
 function EducationPage() {
   const { id } = useParams(); 
+  const [teacherImage, setTeacherImage] = useState(null);
   const [courses, setCourses] = useState([]);
   const [selectedCourse, setSelectedCourse] = useState(null);
   const [selectedPartner, setSelectedPartner] = useState(null);
@@ -15,16 +16,19 @@ function EducationPage() {
 
   useEffect(() => {
     const fetchCourses = async () => {
-      const res = await axios.get(`${host_name}:8000/api/user_course/${id}`, {
+      const res = await axios.get(`${host_name}:8000/api/user_course/`, {
                       headers: { Authorization: `Bearer ${localStorage.token}`} });
       setCourses(res.data);
-
     };
     fetchCourses();
   }, [id]);
   
   const openCourseModal = async (course) => {
     setSelectedCourse(course);
+    const image = await axios.get(`${host_name}:8000/api/user/image/${course.teacher_id}`, {
+            headers: {
+              Authorization: `Bearer ${localStorage.token}`} })
+    setTeacherImage(image.data.imageUrl)
     setExpandedLessonIndex(null);
 
     await axios.get(`${host_name}:8080/api/course-relations/${course.id}/${id}`)
@@ -46,7 +50,7 @@ function EducationPage() {
       <div className="courses-grid">
         {courses.map(course => (
           <div key={course.id} className="education-course-card" onClick={() => openCourseModal(course)}>
-            <img src={course.course_icon_path ? `${host_name}:8080${course.course_icon_path}`: "/default-course-image.png"} alt={course.name} />
+            <img src={course.course_icon_path ? `${host_name}:8080${course.course_icon_path}`: "/default-course-image.png"} alt={course.course_name} />
             <h3>{course.course_name}</h3>
           </div>
         ))}
@@ -56,7 +60,7 @@ function EducationPage() {
         <div className="modal-overlay" onClick={closeModal}>
           <div className="modal-content" onClick={e => e.stopPropagation()}>
             <button className="close-button" onClick={closeModal}>×</button>
-            <h2>{selectedCourse.name}</h2>
+            <h2>{selectedCourse.course_name}</h2>
 
             <div className="tabs">
               <button
@@ -104,7 +108,7 @@ function EducationPage() {
                         {(selectedCourse.lessons || []).map((lesson, index) => (
                           <div key={index} className="lesson-tile">
                             <div className="lesson-header" onClick={() => toggleLesson(index)}>
-                              <span>{lesson.title || `Урок ${index + 1}`}</span>
+                              <span>{lesson.video_name || `Урок ${index + 1}`}</span>
                               <button>🔽</button>
                             </div>
                             {expandedLessonIndex === index && (
@@ -113,7 +117,7 @@ function EducationPage() {
                                   <p className="lesson-description"><strong>Описание:</strong> <span dangerouslySetInnerHTML={{ __html: lesson.description }}></span></p>
                                 )}
                                 {lesson.video ? (
-                                  <video width="100%" height="auto" controls src={`${host_name}:8080/uploads/videos/${lesson.video}`}></video>
+                                  <video width="100%" height="auto" controls src={lesson.video}></video>
                                 ) : (
                                   <p>Видео не добавлено</p>
                                 )}
@@ -124,17 +128,17 @@ function EducationPage() {
                               ))}
                           </div>
                     )}
-                    {activeTab === "teacher" && selectedPartner && (
+                    {activeTab === "teacher" && selectedCourse && (
                       <div className="teacher-card">
                         <img
                           className="teacher-avatar"
-                          src={selectedPartner.imagepath ? `${host_name}:8080${selectedPartner.imagepath}` : "/default-avatar.png"}
+                          src={teacherImage}
                           alt="Преподаватель"
                         />
                         <div className="teacher-details">
-                          <h3>{selectedPartner.name} {selectedPartner.surname}</h3>
+                          <h3>{selectedCourse.teacher_name} {selectedCourse.teacher_surname}</h3>
                           <p className="teacher-bio">Ваш персональный преподаватель по этому курсу.</p>
-                          {selectedPartner.google_meet_url && (
+                          {false && (
                             <a className="meet-link" href={selectedPartner.google_meet_url} target="_blank" rel="noopener noreferrer">
                               📹 Перейти к видеозанятию
                             </a>

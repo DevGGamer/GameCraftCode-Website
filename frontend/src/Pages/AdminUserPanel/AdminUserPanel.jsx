@@ -168,7 +168,7 @@ function AdminUserPanel() {
   const handleTeacherChange = async (teacher_id) => {
     if (!teacher_id) return;
     try {
-      await axios.get(`${host_name}:8000/api/add_user_course_or_teacher/${selectedUser.id}/${teacher_id}`, {
+      await axios.get(`${host_name}:8000/api/add_user_course_and_teacher/${selectedUser.id}/${teacher_id}`, {
                       headers: { Authorization: `Bearer ${localStorage.token}`} });
   
     } catch (error) {
@@ -365,8 +365,8 @@ const filteredUsers = users.filter(user => {
                   {userCourses.map((course) => (
                     <div key = {course.id} className="course-pill">
                       <div>
-                        <span>{course[0]}</span>
-                        <span>{course[1]}</span>
+                        <span>{course.course_name}</span>
+                        <span>{course.teacher_id}</span>
                         <button onClick={() => handleRemoveCourse(course.id)}>Удалить</button>
                       </div>
                     </div>
