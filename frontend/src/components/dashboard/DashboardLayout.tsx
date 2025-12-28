@@ -22,11 +22,11 @@ interface DashboardLayoutProps {
 }
 
 const navItems = [
-  { path: '/dashboard/courses', label: 'Мои курсы', icon: BookOpen },
-  { path: '/dashboard/progress', label: 'Прогресс обучения', icon: TrendingUp },
-  { path: '/dashboard/schedule', label: 'Расписание', icon: Calendar },
-  { path: '/dashboard/projects', label: 'Мои проекты', icon: FolderOpen },
-  { path: '/dashboard/community', label: 'Сообщество', icon: Users },
+  { path: '/account/courses', label: 'Мои курсы', icon: BookOpen },
+  { path: '/account/progress', label: 'Прогресс обучения', icon: TrendingUp },
+  { path: '/account/schedule', label: 'Расписание', icon: Calendar },
+  { path: '/account/projects', label: 'Мои проекты', icon: FolderOpen },
+  { path: '/account/community', label: 'Сообщество', icon: Users },
 ];
 
 const DashboardLayout = ({ children, title, showBack = false }: DashboardLayoutProps) => {
@@ -61,7 +61,7 @@ const DashboardLayout = ({ children, title, showBack = false }: DashboardLayoutP
           <div className="container mx-auto px-4 py-4">
             <div className="flex items-center justify-between">
               {/* Logo */}
-              <Link to="/dashboard" className="flex items-center gap-3">
+              <Link to="/account" className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center shadow-[0_0_20px_hsl(259_100%_59%/0.4)]">
                   <Rocket className="w-5 h-5 text-primary-foreground" />
                 </div>
@@ -79,7 +79,7 @@ const DashboardLayout = ({ children, title, showBack = false }: DashboardLayoutP
                 </div>
 
                 {/* Profile */}
-                <Link to="/dashboard/profile" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
+                <Link to="/account/profile" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
                   <div className="w-9 h-9 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center">
                     {student.avatar ? (
                       <img src={student.avatar} alt={student.name} className="w-full h-full rounded-full object-cover" />
