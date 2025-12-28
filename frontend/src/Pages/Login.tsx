@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -6,8 +6,37 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { useToast } from '@/hooks/use-toast';
 import StarField from '@/components/StarField';
 import { Rocket, Mail, Lock, ArrowLeft, Eye, EyeOff } from 'lucide-react';
+import axios from "axios";
+
+const host_name = 'http://localhost';
 
 const Login = () => {
+    useEffect(() => {
+        const token = localStorage.getItem("token");
+        if (!token) return;
+
+        const checkToken = async () => {
+            try {
+                const res = await fetch(`${host_name}:8000/api/protected`, {
+                  headers: {
+                    authorization: `Bearer ${token}`
+                  }
+                });
+    
+                if (!res.ok)
+                    return;
+          
+                localStorage.setItem('justLoggedIn', 'true'); 
+                navigate(`/account`);
+              } catch (err) {
+                
+              }
+            }
+        
+        checkToken();
+      }, []);
+
+  
   const navigate = useNavigate();
   const { toast } = useToast();
   const [showPassword, setShowPassword] = useState(false);
@@ -27,14 +56,40 @@ const Login = () => {
     
     // Simulate login
     await new Promise(resolve => setTimeout(resolve, 1500));
-    
-    toast({
-      title: "Добро пожаловать!",
-      description: "Вход выполнен успешно.",
-    });
-    
-    setIsLoading(false);
-    navigate('/dashboard');
+
+    axios.post(`${host_name}:8000/api/login`, formData)
+        .then((response) => {
+            const { token } = response.data;
+
+            localStorage.setItem('justLoggedIn', 'true'); 
+            localStorage.setItem("token", token);
+            
+            toast({
+              title: "Добро пожаловать!",
+              description: "Вход выполнен успешно.",
+            });
+            
+            setIsLoading(false);
+            navigate(`/account`);
+          })
+          .catch((error) => {
+            console.error("Login error:", error);
+            if (error.response) {
+              console.log("Response data:", error.response.data);
+              console.log("Status:", error.response.status);
+            } else if (error.request) {
+              console.log("No response received:", error.request);
+            } else {
+              console.log("Request error:", error.message);
+            }
+
+            toast({
+              title: "Упс! Что-то пошло не так :(",
+              description: "Попробуйте ещё раз.",
+            });
+            
+            setIsLoading(false);
+          });
   };
 
   return (
@@ -140,13 +195,6 @@ const Login = () => {
                 )}
               </Button>
             </form>
-            
-            <div className="mt-6 text-center text-sm text-muted-foreground">
-              Ещё нет аккаунта?{' '}
-              <a href="#" className="text-primary hover:text-primary/80 transition-colors font-medium">
-                Зарегистрироваться
-              </a>
-            </div>
           </CardContent>
         </Card>
       </div>

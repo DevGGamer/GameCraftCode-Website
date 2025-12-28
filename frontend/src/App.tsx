@@ -15,6 +15,9 @@ import Schedule from "./pages/dashboard/Schedule";
 import MyProjects from "./pages/dashboard/MyProjects";
 import Community from "./pages/dashboard/Community";
 import Profile from "./pages/dashboard/Profile";
+import EducationPage from './Pages/EducationPage/EducationPage';
+import StudentsPage from './Pages/StudentsPage/StudentsPage';
+import SettingsPage from './Pages/SettingsPage/SettingsPage';
 
 const queryClient = new QueryClient();
 
@@ -28,16 +31,19 @@ const App = () => (
           <Route path="/" element={<Index />} />
           <Route path="/login" element={<Login />} />
           
-          {/* Dashboard routes */}
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/dashboard/courses" element={<MyCourses />} />
-          <Route path="/dashboard/courses/:courseId" element={<CurrentCourse />} />
-          <Route path="/dashboard/progress" element={<CurrentCourse />} />
-          <Route path="/dashboard/schedule" element={<Schedule />} />
-          <Route path="/dashboard/projects" element={<MyProjects />} />
-          <Route path="/dashboard/community" element={<Community />} />
-          <Route path="/dashboard/profile" element={<Profile />} />
-          
+              {/* Dashboard routes */}
+              <Route path="/account" element={<Dashboard />} />
+              <Route path="/account/profile" element={<Profile />} />
+              <Route path="/account/schedule" element={<Schedule />} />
+              <Route path="/account/education" element={<EducationPage />} />
+              <Route path="/account/students" element={<StudentsPage />} />
+              <Route path="/account/settings" element={<SettingsPage />} />
+              <Route path="/account/courses" element={<MyCourses />} />
+              <Route path="/account/courses/:courseId" element={<CurrentCourse />} />
+              <Route path="/account/progress" element={<CurrentCourse />} />
+              <Route path="/account/projects" element={<MyProjects />} />
+              <Route path="/account/community" element={<Community />} />
+
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

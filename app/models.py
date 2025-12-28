@@ -20,4 +20,5 @@ class Courses(Base):
     student_id = Column(Integer, ForeignKey("users.id"))
     course_name = Column(String)
     completed_lessons = Column(Integer)
+    block_number = Column(Integer)
     teacher_id = Column(Integer, ForeignKey("users.id"))

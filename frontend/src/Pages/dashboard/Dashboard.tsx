@@ -30,11 +30,11 @@ const Dashboard = () => {
   };
 
   const dashboardCards = [
-    { path: '/dashboard/courses', label: 'Мои курсы', icon: BookOpen, color: 'from-blue-500 to-cyan-500' },
-    { path: '/dashboard/progress', label: 'Прогресс обучения', icon: TrendingUp, color: 'from-green-500 to-emerald-500' },
-    { path: '/dashboard/schedule', label: 'Расписание', icon: Calendar, color: 'from-purple-500 to-pink-500' },
-    { path: '/dashboard/projects', label: 'Мои проекты', icon: FolderOpen, color: 'from-orange-500 to-yellow-500' },
-    { path: '/dashboard/community', label: 'Сообщество', icon: Users, color: 'from-primary to-secondary' },
+    { path: '/account/courses', label: 'Мои курсы', icon: BookOpen, color: 'from-blue-500 to-cyan-500' },
+    { path: '/account/progress', label: 'Прогресс обучения', icon: TrendingUp, color: 'from-green-500 to-emerald-500' },
+    { path: '/account/schedule', label: 'Расписание', icon: Calendar, color: 'from-purple-500 to-pink-500' },
+    { path: '/account/projects', label: 'Мои проекты', icon: FolderOpen, color: 'from-orange-500 to-yellow-500' },
+    { path: '/account/community', label: 'Сообщество', icon: Users, color: 'from-primary to-secondary' },
   ];
 
   return (
@@ -88,7 +88,7 @@ const Dashboard = () => {
               </div>
 
               {/* Edit Profile */}
-              <Link to="/dashboard/profile">
+              <Link to="/account/profile">
                 <Button variant="outline" size="sm">
                   Редактировать профиль
                 </Button>
@@ -112,7 +112,7 @@ const Dashboard = () => {
                   <span className="font-bold text-primary">{student.currentCourseProgress}%</span>
                 </div>
               </div>
-              <Link to="/dashboard/courses/1">
+              <Link to="/account/courses/1">
                 <Button variant="cosmic">
                   Продолжить
                 </Button>

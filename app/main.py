@@ -194,8 +194,8 @@ def get_courses(payload: dict = Depends(verify_token)):
         data = json.loads(file_data.read().decode("utf-8"))
         file_data.close()
         file_data.release_conn()
-        for key, info in data.items():
-            all_courses_data.append({"name": obj.object_name+key, "description": info.get("description", "Описание отсутствует") })
+        #for key, info in data.items():
+        all_courses_data.append({"name": data[0]["name"], "description": data[0]["description"] })
         
     return all_courses_data
 
@@ -209,28 +209,36 @@ def get_courses(student_id: Optional[int] = None, payload: dict = Depends(verify
 
     for course in courses:
         teacher = db.query(Users).filter(Users.id == course.teacher_id).first()
-        objects = minio_client.list_objects("courses", prefix=course.course_name, recursive=True)
-        lessons = []
-        for obj in objects:
-            if obj.object_name.endswith(".mp4"):  # только видео
-                video_name = obj.object_name.split("/")[-1]
-                url = minio_client.presigned_get_object("courses", obj.object_name)
-                lessons.append( {"video_name": video_name, "video": url} )
-
+        file_data = minio_client.get_object("courses", f"{course.course_name}/passport.json")
+        data = json.loads(file_data.read().decode("utf-8"))
+        file_data.close()
+        file_data.release_conn()
+        data = data[1:]
+        block_data = data[course.block_number-1]
+        
+        for i, module in enumerate(block_data.get("modules", [])):
+            prefix = f"{course.course_name}/Block{course.block_number}/Module{module['id']}/"
+            objects = minio_client.list_objects("courses", prefix=prefix, recursive=True)
+            for obj in objects:
+                if obj.object_name.endswith(".mp4"):
+                    video_name = obj.object_name.split("/")[-1]
+                    url = minio_client.presigned_get_object("courses", obj.object_name)
+                    block_data["modules"][i]["lessons"][int(video_name[1])-1]["video"] = url
         c = {"course_name": course.course_name, "teacher_id": course.teacher_id, "teacher_name": teacher.name, "teacher_surname": teacher.surname,
-        "lessons": lessons}
+        "modules": block_data}
         cours.append(c)
 
     return cours
 
-@app.get("/api/add_user_course_and_teacher/{student_id}/{course_name}/{teacher_id}")
-def get_courses(student_id: int, course_name: str, teacher_id: str, payload: dict = Depends(verify_token), db: Session = Depends(get_db)):
+@app.get("/api/add_user_course_and_teacher/{student_id}/{course_name}/{block_number}/{teacher_id}")
+def get_courses(student_id: int, course_name: str, block_number: int, teacher_id: str, payload: dict = Depends(verify_token), db: Session = Depends(get_db)):
     db: Session = SessionLocal()
 
     user = Courses(
         student_id=student_id,
         completed_lessons = 0,
         teacher_id=teacher_id,
+        block_number=block_number,
         course_name=course_name.replace(">", "/"),
     )
 
