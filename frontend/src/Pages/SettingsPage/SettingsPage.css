@@ -1,0 +1,48 @@
+.settings-page {
+  max-width: 500px;
+  margin: 40px auto;
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  transition: background-color 0.3s, color 0.3s;
+}
+
+.setting-item {
+  margin-bottom: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+select {
+  padding: 8px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+}
+
+.reset-button {
+  background-color: #e74c3c;
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.reset-button:hover {
+  background-color: #c0392b;
+}
+
+/* Светлая тема */
+.light {
+  --bg-color: #ffffff;
+  --text-color: #222222;
+}
+
+/* Тёмная тема */
+.dark {
+  --bg-color: #1e1e1e;
+  --text-color: #f0f0f0;
+}

@@ -123,6 +123,10 @@ function GetPages(role, userID)
                 {
                     "pageName" : "Пользователи",
                     "link" : `/admin/${userID}/adminPanel`
+                },
+                {
+                    "pageName" : "Настройки",
+                    "link" : `/account/${userID}/settings`
                 }
             ];
         
@@ -139,6 +143,10 @@ function GetPages(role, userID)
                 {
                     "pageName" : "Обучение",
                     "link" : `/account/${userID}/education`
+                },
+                {
+                    "pageName" : "Настройки",
+                    "link" : `/account/${userID}/settings`
                 }
             ];
 

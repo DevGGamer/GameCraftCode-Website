@@ -1,4 +1,6 @@
 .student-courses-page {
+  display: flex;
+  justify-content: center;
   padding: 20px;
   color: #0ff;
   background-color: #000;
@@ -42,6 +44,37 @@
   border: 1px solid #0ff;
   box-shadow: 0 0 10px #0ff3;
   flex-grow: 1;
+}
+
+.modules {
+  width: 50vw;
+  height: auto;
+  display: flex;
+  gap: 50px;
+  padding: 20px;
+  background-color: #f3f3f3;
+  box-sizing: border-box;
+}
+
+.left {
+  width: 780px;
+  height: 480px;
+  background-color: #41308b;
+  border-radius: 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  padding: 16px;
+  box-sizing: border-box;
+}
+
+.right {
+  flex: 1;
+  background-color: rgb(138, 30, 114);
+  border-radius: 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  padding: 16px;
+  box-sizing: border-box;
+  overflow-y: auto;
+  height: auto;
 }
 
 .modal-overlay {
