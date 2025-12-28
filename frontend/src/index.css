@@ -1,22 +1,156 @@
-*, *::after, *::before {
-  box-sizing: border-box;
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Nunito:wght@400;500;600;700;800&display=swap');
+
+@layer base {
+  :root {
+    /* Core Space Palette */
+    --background: 246 37% 10%;
+    --foreground: 270 100% 95%;
+
+    --card: 246 37% 14%;
+    --card-foreground: 270 100% 95%;
+
+    --popover: 246 37% 12%;
+    --popover-foreground: 270 100% 95%;
+
+    --primary: 259 100% 59%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 233 100% 69%;
+    --secondary-foreground: 0 0% 100%;
+
+    --muted: 246 30% 20%;
+    --muted-foreground: 270 40% 70%;
+
+    --accent: 270 100% 85%;
+    --accent-foreground: 246 37% 10%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 259 40% 30%;
+    --input: 259 40% 25%;
+    --ring: 259 100% 59%;
+
+    --radius: 1rem;
+
+    /* Custom Cosmic Colors */
+    --cosmic-lavender: 270 100% 85%;
+    --cosmic-purple: 259 100% 59%;
+    --cosmic-blue: 233 100% 69%;
+    --space-dark: 246 37% 10%;
+    --space-card: 246 37% 14%;
+    --light-blue: 219 100% 75%;
+    --glow-purple: 259 100% 65%;
+    --glow-blue: 233 100% 75%;
+    --star-white: 0 0% 100%;
+
+    /* Gradients */
+    --gradient-cosmic: linear-gradient(135deg, hsl(var(--cosmic-purple)) 0%, hsl(var(--cosmic-blue)) 100%);
+    --gradient-hero: linear-gradient(180deg, hsl(246 37% 8%) 0%, hsl(246 37% 14%) 50%, hsl(259 40% 15%) 100%);
+    --gradient-card: linear-gradient(145deg, hsl(246 37% 16%) 0%, hsl(246 37% 12%) 100%);
+    --gradient-glow: radial-gradient(ellipse at center, hsl(var(--cosmic-purple) / 0.3) 0%, transparent 70%);
+
+    /* Shadows */
+    --shadow-glow-sm: 0 0 20px hsl(var(--cosmic-purple) / 0.3);
+    --shadow-glow-md: 0 0 40px hsl(var(--cosmic-purple) / 0.4);
+    --shadow-glow-lg: 0 0 60px hsl(var(--cosmic-purple) / 0.5);
+    --shadow-card: 0 8px 32px hsl(0 0% 0% / 0.3);
+  }
 }
 
-body.landing {
-  margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  background-color: #040531;
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+    font-family: 'Nunito', sans-serif;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Space Grotesk', sans-serif;
+  }
 }
 
-body.platform {
-  display: flex;
-  justify-content: center;
-  margin: 0px;
-  font-family: 'Press Start 2P', cursive;
-  background-color: #1f2a40;
-  color: #ffffff;
+@layer components {
+  .cosmic-glow {
+    box-shadow: var(--shadow-glow-sm);
+    transition: box-shadow 0.3s ease;
+  }
+
+  .cosmic-glow:hover {
+    box-shadow: var(--shadow-glow-md);
+  }
+
+  .gradient-text {
+    background: var(--gradient-cosmic);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .glass-card {
+    background: hsl(var(--space-card) / 0.6);
+    backdrop-filter: blur(12px);
+    border: 1px solid hsl(var(--border) / 0.5);
+  }
+
+  .star-field {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    pointer-events: none;
+  }
+
+  .star {
+    position: absolute;
+    width: 2px;
+    height: 2px;
+    background: hsl(var(--star-white));
+    border-radius: 50%;
+    animation: twinkle 3s ease-in-out infinite;
+  }
+
+  .star::before {
+    content: '';
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background: inherit;
+    border-radius: inherit;
+    box-shadow: 0 0 6px 2px hsl(var(--star-white) / 0.5);
+  }
+
+  @keyframes twinkle {
+    0%, 100% { opacity: 0.3; transform: scale(1); }
+    50% { opacity: 1; transform: scale(1.2); }
+  }
+
+  .floating {
+    animation: floating 6s ease-in-out infinite;
+  }
+
+  @keyframes floating {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-20px); }
+  }
+
+  .pulse-glow {
+    animation: pulse-glow 2s ease-in-out infinite;
+  }
+
+  @keyframes pulse-glow {
+    0%, 100% { box-shadow: 0 0 20px hsl(var(--cosmic-purple) / 0.4); }
+    50% { box-shadow: 0 0 40px hsl(var(--cosmic-purple) / 0.6); }
+  }
 }
