@@ -12,7 +12,18 @@ function EducationPage() {
   const [selectedCourse, setSelectedCourse] = useState(null);
   const [selectedPartner, setSelectedPartner] = useState(null);
   const [expandedLessonIndex, setExpandedLessonIndex] = useState(null);
-  const [activeTab, setActiveTab] = useState("description"); 
+  const [activeTab, setActiveTab] = useState("description");
+
+  const [openModules, setOpenModules] = useState([]);
+  const [selectedVideo, setSelectedVideo] = useState(null);
+
+  const toggleModule = (title) => {
+    setOpenModules((prev) =>
+      prev.includes(title)
+        ? prev.filter((t) => t !== title)
+        : [...prev, title]
+    );
+  };
 
   useEffect(() => {
     const fetchCourses = async () => {
@@ -21,7 +32,7 @@ function EducationPage() {
       setCourses(res.data);
     };
     fetchCourses();
-  }, [id]);
+  }, []);
   
   const openCourseModal = async (course) => {
     setSelectedCourse(course);
@@ -44,24 +55,70 @@ function EducationPage() {
   const toggleLesson = (index) => {
     setExpandedLessonIndex(prev => (prev === index ? null : index));
   };
-  console.log(selectedCourse)
+  console.log(courses[0]?.modules.modules)
   return (
     <div className="student-courses-page">
-      <div className="courses-grid">
+      {!selectedCourse && <div className="courses-grid">
         {courses.map(course => (
           <div key={course.id} className="education-course-card" onClick={() => openCourseModal(course)}>
             <img src={course.course_icon_path ? `${host_name}:8080${course.course_icon_path}`: "/default-course-image.png"} alt={course.course_name} />
             <h3>{course.course_name}</h3>
           </div>
         ))}
-      </div>
+      </div>}
 
       {selectedCourse && (
-        <div className="modal-overlay" onClick={closeModal}>
-          <div className="modal-content" onClick={e => e.stopPropagation()}>
+          <div>
             <button className="close-button" onClick={closeModal}>×</button>
             <h2>{selectedCourse.course_name}</h2>
 
+            <div className='modules'>
+
+              <div className='left'>
+
+                {selectedVideo ? (
+                  <video src={selectedVideo} controls autoPlay />
+                ) : (
+                  <div className="video-placeholder">
+                    Выберите урок, чтобы воспроизвести видео
+                  </div>
+                )}
+
+              </div>
+
+              <div className='right'>
+
+                {courses[0]?.modules?.modules?.map((module) => (
+                  <div key={module.title} className="module">
+                    <div
+                      className="module-header"
+                      onClick={() => toggleModule(module.title)}
+                    >
+                      <span>{module.title}</span>
+                      <span className="arrow">
+                        {openModules.includes(module.title) ? "▲" : "▼"}
+                      </span>
+                    </div>
+
+                    {openModules.includes(module.title) && (
+                      <div className="lessons">
+                        {module.lessons.map((lesson, idx) => (
+                          <button
+                            key={idx}
+                            onClick={() => setSelectedVideo(lesson.video)}
+                          >
+                            {lesson.title}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                ))}
+                
+              </div>
+
+            </div>
+            
             <div className="tabs">
               <button
                 className={activeTab === "description" ? "active" : ""}
@@ -180,7 +237,7 @@ function EducationPage() {
                   )}
                   </div>
                       </div>
-                    </div>
+
                   )}
                 </div>
               );

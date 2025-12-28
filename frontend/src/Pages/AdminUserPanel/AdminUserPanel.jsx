@@ -34,10 +34,12 @@ function AdminUserPanel() {
   const [showModal, setShowModal] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
   const [allCourses, setAllCourses] = useState([]);
+  const [allBlocks, setAllBlocks] = useState([1,2,3]);
   const [userCourses, setUserCourses] = useState([]);
   const [courseTeachers, setCourseTeachers] = useState({});
 
   const [selectedCourseId, setSelectedCourseId] = useState('');
+  const [selectedBlock, setSelectedBlock] = useState('');
   const [selectedTeacherId, setSelectedTeacherId] = useState('');
 
   const [surnameFilter, setSurnameFilter] = useState('');
@@ -153,7 +155,7 @@ function AdminUserPanel() {
   const handleAddCourse = async () => {
     if (!selectedCourseId) return;
     const course = selectedCourseId.replace(/\//g, ">");
-    await axios.get(`${host_name}:8000/api/add_user_course_and_teacher/${selectedUser.id}/${course}/${selectedTeacherId}`, {
+    await axios.get(`${host_name}:8000/api/add_user_course_and_teacher/${selectedUser.id}/${course}/${selectedBlock}/${selectedTeacherId}`, {
                       headers: { Authorization: `Bearer ${localStorage.token}`} });
     setSelectedCourseId('');
     setSelectedTeacherId('');
@@ -349,6 +351,13 @@ const filteredUsers = users.filter(user => {
                       .filter(c => !userCourses.find(uc => uc.id === c.id))
                       .map(course => (
                         <option key={course.name} value={course.name}>{course.name}</option>
+                    ))}
+                  </select>
+                  <select value={selectedBlock} onChange={(e) => setSelectedBlock(e.target.value)}>
+                    <option value="">Выберите блок</option>
+                    {allBlocks
+                      .map(block => (
+                        <option key={block} value={block}>{block}</option>
                     ))}
                   </select>
                   <select value={selectedTeacherId} onChange={(e) => setSelectedTeacherId(e.target.value)}>

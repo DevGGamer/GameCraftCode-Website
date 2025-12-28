@@ -2,7 +2,7 @@
   display: flex;
   width: 100%;
   min-height: 100vh;
-  background: linear-gradient(135deg, #060b1a, #000);
+  background-color: var(--bg-color);
   font-family: 'PixelFont', sans-serif;
   color: #00f0ff;
 }
@@ -23,7 +23,7 @@ h1, h2 {
   align-items: center;
   justify-content: center;
   padding: 20px 10px;
-  background: #010409;
+  background-color: var(--bg-color);
   border-right: 2px solid #00f0ff;
   box-shadow: 4px 0 15px rgba(0, 255, 255, 0.2);
 }
@@ -42,7 +42,7 @@ h1, h2 {
   font-size: 16px;
   cursor: pointer;
   border-radius: 10px;
-  background-color: #0a0a0a;
+  background-color: var(--bg-color);
   color: #00f0ff;
   border: 2px solid #00f0ff;
   box-shadow: 0 0 8px rgba(0, 240, 255, 0.3);
@@ -81,7 +81,7 @@ h1, h2 {
   font-size: 16px;
   cursor: pointer;
   border-radius: 10px;
-  background-color: #0a0a0a;
+  background-color: var(--bg-color);
   color: #ff4d4d;
   border: 2px solid #ff4d4d;
   transition: all 0.3s ease-in-out;
@@ -107,7 +107,7 @@ h1, h2 {
   left: 0;
   height: 100vh;
   width: 100vw;
-  background: #000000e8;
+  background-color: var(--bg-color);
   display: flex;
   align-items: center;
   justify-content: center;

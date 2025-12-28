@@ -2,3 +2,36 @@
   width: 100%;
   min-height: 100vh;
 }
+
+/* Глобальные цветовые переменные */
+:root {
+  --bg-color: #ffffff;
+  --text-color: #1e1e1e;
+  --card-bg: #f8f8f8;
+  --accent-color: #007bff;
+}
+
+/* 🌙 Тёмная тема */
+.dark {
+  --bg-color: #121212;
+  --text-color: #eaeaea;
+  --card-bg: #1e1e1e;
+  --accent-color: #4dabf7;
+}
+
+/* 🌞 Светлая тема */
+.light {
+  --bg-color: #ffffff;
+  --text-color: #1e1e1e;
+  --card-bg: #f8f8f8;
+  --accent-color: #007bff;
+}
+
+/* Применяем переменные глобально */
+body {
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  transition: background-color 0.3s, color 0.3s;
+  margin: 0;
+  padding: 0;
+}
