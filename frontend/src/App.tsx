@@ -1,48 +1,55 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import StartPage from './Pages/StartPage/StartPage';
-import Login from './Pages/LoginPage/Login';
-import Account from './Pages/AccountPage/Account';
-import Profile from './Pages/ProfileMode/Profile';
-import AdminPanel from './Pages/AdminUserPanel/AdminUserPanel';
-import Shedule from './Pages/Shedule/Shedule';
-import CoursesPage from './Pages/CoursesPage/CoursesPage';
+import { Toaster } from "@/components/ui/toaster";
+import { Toaster as Sonner } from "@/components/ui/sonner";
+import { TooltipProvider } from "@/components/ui/tooltip";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import Index from "./pages/Index";
+import Login from "./pages/Login";
+import NotFound from "./pages/NotFound";
+
+// Dashboard pages
+import Dashboard from "./pages/dashboard/Dashboard";
+import MyCourses from "./pages/dashboard/MyCourses";
+import CurrentCourse from "./pages/dashboard/CurrentCourse";
+import Schedule from "./pages/dashboard/Schedule";
+import MyProjects from "./pages/dashboard/MyProjects";
+import Community from "./pages/dashboard/Community";
+import Profile from "./pages/dashboard/Profile";
 import EducationPage from './Pages/EducationPage/EducationPage';
-import Unauthorized from './Pages/Unauthorized/Unauthorized';
 import StudentsPage from './Pages/StudentsPage/StudentsPage';
 import SettingsPage from './Pages/SettingsPage/SettingsPage';
-import BodyClassHandler from './Body-Class';
-import { SettingsProvider } from './Pages/SettingsPage/SettingsContext';
-import './App.css'
 
-function App() {
-  return (
-     <BrowserRouter>
-     <BodyClassHandler />
-     <SettingsProvider>
+const queryClient = new QueryClient();
+
+const App = () => (
+  <QueryClientProvider client={queryClient}>
+    <TooltipProvider>
+      <Toaster />
+      <Sonner />
+      <BrowserRouter>
         <Routes>
-          <Route path="/" element={<StartPage />} />
+          <Route path="/" element={<Index />} />
           <Route path="/login" element={<Login />} />
-          <Route path="/unauthorized" element={<Unauthorized />} />
-          <Route path="/account/:id" element={<Account />}>
-              <Route path="profile" element={<Profile />} />
-              <Route path="shedule" element={<Shedule />} />
-              <Route path="education" element={<EducationPage />} />
-              <Route path="students" element={<StudentsPage />} />
-              <Route path="settings" element={<SettingsPage />} />
-          </Route>
+          
+              {/* Dashboard routes */}
+              <Route path="/account" element={<Dashboard />} />
+              <Route path="/account/profile" element={<Profile />} />
+              <Route path="/account/schedule" element={<Schedule />} />
+              <Route path="/account/education" element={<EducationPage />} />
+              <Route path="/account/students" element={<StudentsPage />} />
+              <Route path="/account/settings" element={<SettingsPage />} />
+              <Route path="/account/courses" element={<MyCourses />} />
+              <Route path="/account/courses/:courseId" element={<CurrentCourse />} />
+              <Route path="/account/progress" element={<CurrentCourse />} />
+              <Route path="/account/projects" element={<MyProjects />} />
+              <Route path="/account/community" element={<Community />} />
 
-          <Route path="/admin/:id" element={<Account />}>
-              <Route path="profile" element={<Profile />} />
-              <Route path="shedule" element={<Shedule />} />
-              <Route path="students" element={<StudentsPage />} />
-              <Route path="courses" element={<CoursesPage />} />
-              <Route path="adminPanel" element={<AdminPanel />} />
-          </Route>
+          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+          <Route path="*" element={<NotFound />} />
         </Routes>
-     </SettingsProvider>
-
-    </BrowserRouter>
-  );
-}
+      </BrowserRouter>
+    </TooltipProvider>
+  </QueryClientProvider>
+);
 
 export default App;
