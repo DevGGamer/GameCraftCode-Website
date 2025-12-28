@@ -42,7 +42,7 @@ const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
-    email: '',
+    login: '',
     password: '',
   });
 
@@ -57,7 +57,10 @@ const Login = () => {
     // Simulate login
     await new Promise(resolve => setTimeout(resolve, 1500));
 
-    axios.post(`${host_name}:8000/api/login`, formData)
+    axios.post(`${host_name}:8000/api/login`, {
+          login: formData.login,
+          password: formData.password,
+        })
         .then((response) => {
             const { token } = response.data;
 
@@ -138,10 +141,10 @@ const Login = () => {
                   Email
                 </label>
                 <Input
-                  name="email"
+                  name="login"
                   type="email"
                   placeholder="example@mail.ru"
-                  value={formData.email}
+                  value={formData.login}
                   onChange={handleChange}
                   required
                 />
