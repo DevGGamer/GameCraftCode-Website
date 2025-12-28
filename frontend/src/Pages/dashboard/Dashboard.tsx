@@ -112,7 +112,7 @@ const Dashboard = () => {
                   <span className="font-bold text-primary">{student.currentCourseProgress}%</span>
                 </div>
               </div>
-              <Link to="/dashboard/courses/1">
+              <Link to="/account/courses/1">
                 <Button variant="cosmic">
                   Продолжить
                 </Button>
