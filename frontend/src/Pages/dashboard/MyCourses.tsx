@@ -120,7 +120,7 @@ const MyCourses = () => {
                 </div>
 
                 {/* Action */}
-                <Link to={`/account/courses/${course.id}`}>
+                <Link to={`/dashboard/courses/${course.id}`}>
                   <Button 
                     variant={course.isActive ? 'cosmic' : 'outline'} 
                     className="w-full"
