@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -23,7 +23,16 @@ import {
 
 const CurrentCourse = () => {
   const { courseId } = useParams();
+  const navigate = useNavigate();
   const [expandedModule, setExpandedModule] = useState<number | null>(1);
+
+  const handlePlayVideo = (lessonId: number) => {
+    navigate(`/dashboard/courses/${courseId}/lesson/${lessonId}`);
+  };
+
+  const handleDoAssignment = (assignmentId: number) => {
+    navigate(`/dashboard/courses/${courseId}/assignment/${assignmentId}`);
+  };
 
   // Mock course data
   const course = {
@@ -225,9 +234,23 @@ const CurrentCourse = () => {
                             )}
                             {item.completed ? (
                               <CheckCircle2 className="w-4 h-4 text-green-500" />
-                            ) : (
-                              <Button size="sm" variant="ghost" className="h-7 px-2">
+                            ) : item.type === 'video' ? (
+                              <Button 
+                                size="sm" 
+                                variant="ghost" 
+                                className="h-7 px-2"
+                                onClick={() => handlePlayVideo(item.id)}
+                              >
                                 <Play className="w-3 h-3" />
+                              </Button>
+                            ) : (
+                              <Button 
+                                size="sm" 
+                                variant="ghost" 
+                                className="h-7 px-2"
+                                onClick={() => handleDoAssignment(item.id)}
+                              >
+                                <FileText className="w-3 h-3" />
                               </Button>
                             )}
                           </div>
@@ -274,9 +297,21 @@ const CurrentCourse = () => {
                         </div>
                       </div>
                       {assignment.grade ? (
-                        <Badge className="bg-green-500/20 text-green-400">{assignment.grade}</Badge>
+                        <Button 
+                          size="sm" 
+                          variant="ghost"
+                          onClick={() => navigate(`/dashboard/courses/${courseId}/assignment/${assignment.id}/feedback`)}
+                        >
+                          <Badge className="bg-green-500/20 text-green-400">{assignment.grade}</Badge>
+                        </Button>
                       ) : assignment.status !== 'locked' ? (
-                        <Button size="sm" variant="outline">Выполнить</Button>
+                        <Button 
+                          size="sm" 
+                          variant="outline"
+                          onClick={() => handleDoAssignment(assignment.id)}
+                        >
+                          Выполнить
+                        </Button>
                       ) : null}
                     </div>
                   ))}
@@ -301,7 +336,11 @@ const CurrentCourse = () => {
                           <p className="text-sm text-muted-foreground">{recording.date} • {recording.duration}</p>
                         </div>
                       </div>
-                      <Button size="sm" variant="ghost">
+                      <Button 
+                        size="sm" 
+                        variant="ghost"
+                        onClick={() => handlePlayVideo(recording.id)}
+                      >
                         <Play className="w-4 h-4 mr-1" />
                         Смотреть
                       </Button>

@@ -1,4 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Link } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Rocket, Star, Code, Gamepad2, Brain, Cpu } from "lucide-react";
@@ -12,6 +13,7 @@ const programs = [
     description: "Первые шаги в программировании через визуальное создание игр и анимаций",
     skills: ["Логика", "Анимация", "Игры"],
     color: "from-[hsl(280,80%,60%)] to-[hsl(320,80%,60%)]",
+    slug: 'game-creation'
   },
   {
     icon: Code,
@@ -21,6 +23,7 @@ const programs = [
     description: "Изучаем один из самых востребованных языков через проекты и мини-игры",
     skills: ["Python", "Алгоритмы", "Проекты"],
     color: "from-[hsl(200,80%,50%)] to-[hsl(230,80%,60%)]",
+    slug: 'python-kids'
   },
   {
     icon: Rocket,
@@ -30,6 +33,7 @@ const programs = [
     description: "Создаём настоящие сайты с помощью HTML, CSS и JavaScript",
     skills: ["HTML/CSS", "JavaScript", "Сайты"],
     color: "from-[hsl(150,70%,45%)] to-[hsl(180,70%,50%)]",
+    slug: 'web-development'
   },
   {
     icon: Brain,
@@ -39,6 +43,7 @@ const programs = [
     description: "Погружаемся в машинное обучение и нейронные сети на практике",
     skills: ["ML", "Data Science", "AI"],
     color: "from-[hsl(258,100%,59%)] to-[hsl(233,100%,67%)]",
+    slug: 'artificial-intelligence'
   },
   {
     icon: Cpu,
@@ -48,6 +53,7 @@ const programs = [
     description: "Учимся создавать мобильные приложения для Android и iOS",
     skills: ["React Native", "UI/UX", "Apps"],
     color: "from-[hsl(30,90%,55%)] to-[hsl(50,90%,55%)]",
+    slug: 'mobile-apps'
   },
   {
     icon: Star,
@@ -57,6 +63,7 @@ const programs = [
     description: "Готовим к участию в престижных олимпиадах по программированию",
     skills: ["C++", "Алгоритмы", "Олимпиады"],
     color: "from-[hsl(350,80%,55%)] to-[hsl(20,80%,55%)]",
+    slug: 'game-design'
   },
 ];
 
@@ -113,9 +120,11 @@ const ProgramsSection = () => {
                     </span>
                   ))}
                 </div>
-                <Button variant="cosmicOutline" className="w-full">
-                  Подробнее
-                </Button>
+                <Link to={`/course/${program.slug}`}>
+                  <Button variant="cosmicOutline" className="w-full">
+                      Подробнее
+                  </Button>
+                </Link>
               </CardContent>
             </Card>
           ))}
