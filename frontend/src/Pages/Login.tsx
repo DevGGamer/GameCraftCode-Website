@@ -27,7 +27,7 @@ const Login = () => {
                     return;
           
                 localStorage.setItem('justLoggedIn', 'true'); 
-                navigate(`/account`);
+                navigate(`/dashboard`);
               } catch (err) {
                 
               }
@@ -73,7 +73,7 @@ const Login = () => {
             });
             
             setIsLoading(false);
-            navigate(`/account`);
+            navigate(`/dashboard`);
           })
           .catch((error) => {
             console.error("Login error:", error);

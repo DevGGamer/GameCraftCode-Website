@@ -42,7 +42,7 @@ const Profile = () => {
   };
 
   const handleCancel = () => {
-    navigate('/account');
+    navigate('/dashboard');
   };
 
   return (
