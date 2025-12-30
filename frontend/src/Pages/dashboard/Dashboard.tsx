@@ -29,7 +29,7 @@ const Dashboard = () => {
     level: 5,
     achievements: 12,
   };
-
+  
   const dashboardCards = [
     { path: '/dashboard/courses', label: 'Мои курсы', icon: BookOpen, color: 'from-blue-500 to-cyan-500' },
     { path: '/dashboard/progress', label: 'Прогресс обучения', icon: TrendingUp, color: 'from-green-500 to-emerald-500' },
