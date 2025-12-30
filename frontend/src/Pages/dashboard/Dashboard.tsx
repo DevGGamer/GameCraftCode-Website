@@ -16,10 +16,14 @@ import {
   Flame
 } from 'lucide-react';
 import { Link as RouterLink } from 'react-router-dom';
+import { useState, useEffect } from "react";
+import axios from "axios";
+
+const host_name = 'http://localhost';
 
 const Dashboard = () => {
   // Mock student data
-  const student = {
+  const [student, setStudent] = useState({
     name: 'Алексей',
     avatar: null,
     currentCourse: 'Python для начинающих',
@@ -28,7 +32,26 @@ const Dashboard = () => {
     streak: 7,
     level: 5,
     achievements: 12,
-  };
+  });
+
+  const token = localStorage.getItem("token");
+
+  useEffect(() => {
+      axios.get(`${host_name}:8000/api/user`, {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        })
+        .then((response) => {
+          setStudent(prev => ({
+            ...prev,
+            name: response.data.userInfo.name
+          }));
+        })
+        .catch((error) => {
+          console.log(error);
+        });
+    }, []);
   
   const dashboardCards = [
     { path: '/dashboard/courses', label: 'Мои курсы', icon: BookOpen, color: 'from-blue-500 to-cyan-500' },
