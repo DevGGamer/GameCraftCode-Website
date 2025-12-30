@@ -13,7 +13,9 @@ import {
   User,
   Trophy,
   Coins,
-  ChevronLeft
+  ChevronLeft,
+  Shield,
+  GraduationCap
 } from 'lucide-react';
 
 interface DashboardLayoutProps {
@@ -22,14 +24,20 @@ interface DashboardLayoutProps {
   showBack?: boolean;
 }
 
+const mockUserRole: 'admin' | 'teacher' | 'student' | 'parent' = 'admin';
+
 const navItems = [
-  { path: '/dashboard/courses', label: 'Мои курсы', icon: BookOpen },
-  { path: '/dashboard/progress', label: 'Прогресс обучения', icon: TrendingUp },
-  { path: '/dashboard/schedule', label: 'Расписание', icon: Calendar },
-  { path: '/dashboard/projects', label: 'Мои проекты', icon: FolderOpen },
-  { path: '/dashboard/achievements', label: 'Достижения', icon: Trophy },
-  { path: '/dashboard/community', label: 'Сообщество', icon: Users },
+  { path: '/dashboard/courses', label: 'Мои курсы', icon: BookOpen, roles: ['student', 'parent', 'teacher', 'admin'] },
+  { path: '/dashboard/progress', label: 'Прогресс обучения', icon: TrendingUp, roles: ['student', 'parent', 'admin'] },
+  { path: '/dashboard/schedule', label: 'Расписание', icon: Calendar, roles: ['student', 'parent', 'teacher', 'admin'] },
+  { path: '/dashboard/projects', label: 'Мои проекты', icon: FolderOpen, roles: ['student', 'parent', 'admin'] },
+  { path: '/dashboard/achievements', label: 'Достижения', icon: Trophy, roles: ['student', 'parent', 'admin'] },
+  { path: '/dashboard/community', label: 'Сообщество', icon: Users, roles: ['student', 'parent', 'teacher', 'admin'] },
+  { path: '/dashboard/admin', label: 'Админ панель', icon: Shield, roles: ['admin'] },
+  { path: '/dashboard/methodologist', label: 'Панель методиста', icon: GraduationCap, roles: ['admin'] },
 ];
+
+const filteredNavItems = navItems.filter(item => item.roles.includes(mockUserRole));
 
 const DashboardLayout = ({ children, title, showBack = false }: DashboardLayoutProps) => {
   const location = useLocation();
@@ -107,7 +115,7 @@ const DashboardLayout = ({ children, title, showBack = false }: DashboardLayoutP
         <nav className="border-b border-border/30 bg-card/20 backdrop-blur-md overflow-x-auto">
           <div className="container mx-auto px-4">
             <div className="flex items-center gap-1 py-2">
-              {navItems.map((item) => {
+              {filteredNavItems.map((item) => {
                 const isActive = location.pathname === item.path || location.pathname.startsWith(item.path + '/');
                 return (
                   <Link
