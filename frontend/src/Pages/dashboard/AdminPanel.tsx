@@ -622,10 +622,6 @@ const AdminPanel = () => {
             </Button>
           </div>
           
-          <p className="text-sm text-muted-foreground">
-            💡 Преподаватели фильтруются по выбранному курсу
-          </p>
-          
           {courseAssignments.map((assignment, index) => {
             const availableTeachers = assignment.courseId 
               ? getTeachersForCourse(assignment.courseId)
