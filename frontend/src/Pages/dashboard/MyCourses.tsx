@@ -5,9 +5,13 @@ import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import { BookOpen, Clock, Star, Play } from 'lucide-react';
+import { useState, useEffect } from "react";
+import axios from "axios";
+
+const host_name = 'http://localhost';
 
 const MyCourses = () => {
-  const courses = [
+  const [courses, setCourses] = useState([
     {
       id: 1,
       title: 'Python для начинающих',
@@ -56,7 +60,39 @@ const MyCourses = () => {
       isActive: false,
       color: 'from-purple-500 to-pink-500',
     },
-  ];
+  ]);
+
+  const token = localStorage.getItem("token");
+
+  useEffect(() => {
+      axios.get(`${host_name}:8000/api/user_course/`, {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        })
+        .then((response) => {
+          console.log(response.data)
+          const cours = response.data.map((item, index) => ({
+            id: index,
+            title: item.title,
+            description: item.description,
+            progress: 0,
+            totalLessons: 28,
+            completedLessons: 0,
+            duration: item.duration,
+            level: item.level,
+            isActive: false,
+            color: 'from-purple-500 to-pink-500',
+          }))
+          setCourses(prev => [
+            ...prev,
+            ...cours
+          ]);
+        })
+        .catch((error) => {
+          console.log(error);
+        });
+    }, []);
 
   return (
     <DashboardLayout title="Мои курсы">
