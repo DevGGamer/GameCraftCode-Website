@@ -1,10 +1,11 @@
-from fastapi import FastAPI, Depends, Request, HTTPException, File, UploadFile, Header, status, Path
+from fastapi import FastAPI, Depends, Request, HTTPException, File, UploadFile, Header, status, Path, Form
 from fastapi.middleware.cors import CORSMiddleware
 from .database import SessionLocal, Base, engine
 from .auth import generate_token, verify_token
 from datetime import datetime, timedelta, date
-from .models import Users, Courses
+from .models import Users, Courses, UserAchievement, UserActivity
 from sqlalchemy.orm import Session
+from sqlalchemy import text
 from minio.error import S3Error
 from pydantic import BaseModel
 from typing import Optional
@@ -47,6 +48,14 @@ class LoginRequest(BaseModel):
     login: str
     password: str
 
+class UserInfoRequest(BaseModel):
+    name: str
+    surname: str
+    email: str | None
+    phone: str | None
+    birthDate : date | None
+    avatar: UploadFile | None
+
 # Простейший rate limiter (для примера)
 login_attempts = {}
 
@@ -59,8 +68,10 @@ app.add_middleware(
     allow_headers=["*"]
 )
 
+MINIO_PUBLIC_URL = "localhost:4000"
+
 minio_client = Minio(
-    "localhost:4000",
+    MINIO_PUBLIC_URL,
     access_key="admin",
     secret_key="adminpas",
     secure=False
@@ -80,7 +91,7 @@ def login(data: LoginRequest, request: Request, db: Session = Depends(get_db)):
     if not isinstance(login, str) or not isinstance(password, str):
         raise HTTPException(status_code=400, detail="Неверные данные")
 
-    # Ограничение по количеству попыток
+    # Limit on the number of attempts
     client_ip = request.client.host
     attempts = login_attempts.get(client_ip, {"count":0, "time": datetime.utcnow()})
     if attempts["count"] >= 10 and (datetime.utcnow() - attempts["time"]).seconds < 600:
@@ -88,40 +99,153 @@ def login(data: LoginRequest, request: Request, db: Session = Depends(get_db)):
 
     user = db.query(Users).filter(Users.login == login).first()
     if not user or password != user.password:
-        # увеличиваем счётчик неудачных попыток
+        # increase the counter of unsuccessful attempts
         attempts["count"] += 1
         attempts["time"] = datetime.utcnow()
         login_attempts[client_ip] = attempts
         raise HTTPException(status_code=401, detail="Неверный логин или пароль")
 
-    # сброс счётчика после успешного входа
+    # reset the counter after a successful login
     login_attempts[client_ip] = {"count":0, "time": datetime.utcnow()}
 
     token = generate_token({"id": user.id, "login": user.login, "role": user.role})
     return {"message": "Успешный вход", "token": token, "user": {"id": user.id, "name": user.name}}
 
-@app.get("/api/user")
-def get_user(payload: dict = Depends(verify_token), db: Session = Depends(get_db)):
-    """
-    Возвращает данные пользователя по ID. JWT проверяется через Depends.
-    """
+@app.get("/api/profile")
+def get_user_profile(
+    payload: dict = Depends(verify_token),
+    db: Session = Depends(get_db)
+):
     user = db.query(Users).filter(Users.id == payload["id"]).first()
     if not user:
         raise HTTPException(status_code=404, detail="Пользователь не найден")
 
+    # record activity
+    track_activity(user.id, db)
+
+    # achievements
+    achievements = (
+        db.query(UserAchievement)
+        .filter(UserAchievement.user_id == user.id)
+        .count()
+    )
+
+    # streak (Postgres)
+    streak = get_streak(user.id, db)
+
+    avatar = get_avatar_url(user.id)
+
     return {
-        "id": user.id,
-        "role": user.role,
-        "userInfo": {
-            "login": user.login,
+        "user": {
+            "id": user.id,
             "name": user.name,
             "surname": user.surname,
             "email": user.email,
+            "phone" : user.phone,
+            "birthDate" : user.birth_date,
             "role": user.role,
-            "phone": user.phone,
-            "birth_date": user.birth_date,
+            "avatar": avatar,
+        },
+        "stats": {
+            "achievements": achievements,
+            "streak": streak,
+            "coins": user.coins,
+            "balance": user.balance,
+            "level": user.level
         }
     }
+
+def get_avatar_url(user_id: int) -> str | None:
+    object_name = f"{user_id}/avatar.png"
+    try:
+        # Checking if an object exists
+        minio_client.stat_object("users", object_name)
+        # Generate a temporary URL for 1 hour
+        url = minio_client.presigned_get_object(
+            "users",
+            object_name,
+            expires=timedelta(hours=1)
+        )
+        return url
+    except S3Error:
+        return None
+
+def get_streak(user_id: int, db: Session) -> int:
+    query = text("""
+        SELECT COUNT(*) AS streak
+        FROM (
+            SELECT
+                activity_date,
+                activity_date - (ROW_NUMBER() OVER (ORDER BY activity_date DESC))::int AS grp
+            FROM user_activity
+            WHERE user_id = :user_id
+        ) t
+        WHERE grp = current_date - 1
+    """)
+    result = db.execute(query, {"user_id": user_id}).scalar()
+    return result or 0
+
+def track_activity(user_id: int, db: Session):
+    today = date.today()
+
+    exists = (
+        db.query(UserActivity)
+        .filter(
+            UserActivity.user_id == user_id,
+            UserActivity.activity_date == today
+        )
+        .first()
+    )
+
+    if not exists:
+        db.add(UserActivity(
+            user_id=user_id,
+            activity_date=today
+        ))
+        db.commit()
+
+@app.put("/api/profile")
+def update_user_profile(
+    name: str = Form(...),
+    surname: str = Form(...),
+    email: str = Form(...),
+    phone: str | None = Form(None),
+    birthDate: date | None = Form(None),
+    avatar: UploadFile | None = File(None),
+
+    payload: dict = Depends(verify_token),
+    db: Session = Depends(get_db),
+):
+    user = db.query(Users).filter(Users.id == payload["id"]).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="Пользователь не найден")
+
+    user.name = name
+    user.surname = surname
+    user.email = email
+    user.phone = phone
+    user.birth_date = birthDate
+
+    if avatar:
+        if avatar.content_type not in ("image/png", "image/jpeg", "image/webp"):
+            raise HTTPException(status_code=400, detail="Неподдерживаемый формат изображения")
+
+        object_name = f"{user.id}/avatar.png"
+
+        content = avatar.file.read()
+
+        minio_client.put_object(
+            bucket_name="users",
+            object_name=object_name,
+            data=io.BytesIO(content),
+            length=len(content),
+            content_type="image/png",
+        )
+
+    db.commit()
+
+    return {"message": "Профиль обновлён"}
+    
 
 @app.post("/api/add_user")
 async def submit_form(data: AddUserRequest, db: Session = Depends(get_db)):
