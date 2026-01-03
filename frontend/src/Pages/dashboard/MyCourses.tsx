@@ -71,18 +71,20 @@ const MyCourses = () => {
           }
         })
         .then((response) => {
-          console.log(response.data)
+          //console.log(response.data)
           const cours = response.data.map((item, index) => ({
             id: index,
             title: item.title,
             description: item.description,
-            progress: 0,
-            totalLessons: 28,
-            completedLessons: 0,
+            progress: item.progress,
+            totalLessons: item.totalLessons,
+            completedLessons: item.completedLessons,
             duration: item.duration,
             level: item.level,
-            isActive: false,
+            isActive: item.isActive,
             color: 'from-purple-500 to-pink-500',
+            instructor: item.instructor,
+            modules: item.modules
           }))
           setCourses(prev => [
             ...prev,
@@ -156,7 +158,7 @@ const MyCourses = () => {
                 </div>
 
                 {/* Action */}
-                <Link to={`/dashboard/courses/${course.id}`}>
+                <Link to={`/dashboard/courses/${course.id}`} state={{ course }}>
                   <Button 
                     variant={course.isActive ? 'cosmic' : 'outline'} 
                     className="w-full"
