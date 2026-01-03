@@ -12,7 +12,16 @@ const host_name = 'http://localhost';
 
 const Login = () => {
     useEffect(() => {
+        const rememberMe = localStorage.getItem("rememberMe") === "true";
+
+        if (rememberMe == false)
+        {
+          localStorage.removeItem("token");
+          return;
+        }
+
         const token = localStorage.getItem("token");
+
         if (!token) return;
 
         const checkToken = async () => {
@@ -26,7 +35,6 @@ const Login = () => {
                 if (!res.ok)
                     return;
           
-                localStorage.setItem('justLoggedIn', 'true'); 
                 navigate(`/dashboard`);
               } catch (err) {
                 
@@ -40,6 +48,7 @@ const Login = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [showPassword, setShowPassword] = useState(false);
+  const [rememberMe, setRememberMe] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
     login: '',
@@ -64,7 +73,11 @@ const Login = () => {
         .then((response) => {
             const { token } = response.data;
 
-            localStorage.setItem('justLoggedIn', 'true'); 
+            if (rememberMe)
+              localStorage.setItem("rememberMe", "true");
+            else
+              localStorage.removeItem("rememberMe");
+
             localStorage.setItem("token", token);
             
             toast({
@@ -176,7 +189,7 @@ const Login = () => {
               
               <div className="flex items-center justify-between text-sm">
                 <label className="flex items-center gap-2 cursor-pointer">
-                  <input type="checkbox" className="rounded border-border" />
+                  <input type="checkbox" className="rounded border-border" onChange={(e) => setRememberMe(e.target.checked)}/>
                   <span className="text-muted-foreground">Запомнить меня</span>
                 </label>
                 <a href="#" className="text-primary hover:text-primary/80 transition-colors">
