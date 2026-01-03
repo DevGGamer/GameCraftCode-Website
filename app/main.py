@@ -337,19 +337,30 @@ def get_courses(student_id: Optional[int] = None, payload: dict = Depends(verify
         data = json.loads(file_data.read().decode("utf-8"))
         file_data.close()
         file_data.release_conn()
-        data = data[1:]
-        block_data = data[course.block_number-1]
-        
-        for i, module in enumerate(block_data.get("modules", [])):
-            prefix = f"{course.course_name}/Block{course.block_number}/Module{module['id']}/"
+        data2 = data[1]
+        k=0
+        for i, module in enumerate(data2.get("modules", [])):
+            prefix = f"{course.course_name}/Module{module['id']}/"
             objects = minio_client.list_objects("courses", prefix=prefix, recursive=True)
             for obj in objects:
                 if obj.object_name.endswith(".mp4"):
+                    k+=1
                     video_name = obj.object_name.split("/")[-1]
                     url = minio_client.presigned_get_object("courses", obj.object_name)
-                    block_data["modules"][i]["lessons"][int(video_name[1])-1]["video"] = url
-        c = {"course_name": course.course_name, "teacher_id": course.teacher_id, "teacher_name": teacher.name, "teacher_surname": teacher.surname,
-        "modules": block_data}
+                    data2["modules"][i]["items"][int(video_name[1])-1]["video"] = url
+        if course.completed_lessons == 0:
+            progr=0
+        else:
+            progr = round(k/course.completed_lessons * 100)
+        if progr == 100:
+            active = False
+        else:
+            active = True
+        c = {"title": data[0]["title"], "level": data[0]["level"], "description": data[0]["description"], 
+             "duration": data[0]["duration"], "teacher_id": course.teacher_id, "completedLessons": course.completed_lessons, 
+             "totalLessons": k, "progress": progr, "isActive": active,
+             "instructor": { "surname": teacher.surname, "name": teacher.name, "title": "Senior Python Developer" }, 
+             "modules": data2["modules"]}
         cours.append(c)
 
     return cours

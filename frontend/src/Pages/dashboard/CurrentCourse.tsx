@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -26,13 +26,16 @@ const CurrentCourse = () => {
   const navigate = useNavigate();
   const [expandedModule, setExpandedModule] = useState<number | null>(1);
 
-  const handlePlayVideo = (lessonId: number) => {
-    navigate(`/dashboard/courses/${courseId}/lesson/${lessonId}`);
+  const handlePlayVideo = (lessonId: number, lesson) => {
+    navigate(`/dashboard/courses/${courseId}/lesson/${lessonId}`, { state: { lesson }} );
   };
 
   const handleDoAssignment = (assignmentId: number) => {
     navigate(`/dashboard/courses/${courseId}/assignment/${assignmentId}`);
   };
+
+  const { state } = useLocation();
+  console.log(state)
 
   // Mock course data
   const course = {
@@ -153,7 +156,7 @@ const CurrentCourse = () => {
   };
 
   return (
-    <DashboardLayout showBack title={course.title}>
+    <DashboardLayout showBack title={state.course.title}>
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Main Content */}
         <div className="lg:col-span-2 space-y-6">
@@ -163,12 +166,12 @@ const CurrentCourse = () => {
               <div className="flex items-center justify-between mb-4">
                 <h2 className="font-display font-bold text-lg">Прогресс курса</h2>
                 <Badge className="bg-primary/20 text-primary border-primary/30">
-                  {course.completedLessons}/{course.totalLessons} уроков
+                  {state.course.completedLessons}/{state.course.totalLessons} уроков
                 </Badge>
               </div>
-              <Progress value={course.progress} className="h-4 mb-2" />
+              <Progress value={state.course.progress} className="h-4 mb-2" />
               <p className="text-sm text-muted-foreground">
-                До завершения осталось {course.totalLessons - course.completedLessons} уроков
+                До завершения осталось {state.course.totalLessons - state.course.completedLessons} уроков
               </p>
             </CardContent>
           </Card>
@@ -179,7 +182,7 @@ const CurrentCourse = () => {
               <CardTitle className="font-display">Модули курса</CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
-              {modules.map((module) => (
+              {state.course.modules.map((module) => (
                 <div 
                   key={module.id} 
                   className={`rounded-xl border transition-all ${
@@ -239,7 +242,7 @@ const CurrentCourse = () => {
                                 size="sm" 
                                 variant="ghost" 
                                 className="h-7 px-2"
-                                onClick={() => handlePlayVideo(item.id)}
+                                onClick={() => handlePlayVideo(item.id, item)}
                               >
                                 <Play className="w-3 h-3" />
                               </Button>
@@ -370,15 +373,15 @@ const CurrentCourse = () => {
             <CardContent>
               <div className="flex items-center gap-4">
                 <div className="w-14 h-14 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center">
-                  {course.instructor.avatar ? (
-                    <img src={course.instructor.avatar} alt={course.instructor.name} className="w-full h-full rounded-full object-cover" />
+                  {state.course.instructor.avatar ? (
+                    <img src={state.course.instructor.avatar} alt={state.course.instructor.name} className="w-full h-full rounded-full object-cover" />
                   ) : (
                     <User className="w-7 h-7 text-primary-foreground" />
                   )}
                 </div>
                 <div>
-                  <h4 className="font-bold text-foreground">{course.instructor.name}</h4>
-                  <p className="text-sm text-muted-foreground">{course.instructor.title}</p>
+                  <h4 className="font-bold text-foreground">{state.course.instructor.name}</h4>
+                  <p className="text-sm text-muted-foreground">{state.course.instructor.title}</p>
                 </div>
               </div>
             </CardContent>

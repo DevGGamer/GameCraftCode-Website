@@ -1,4 +1,4 @@
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useLocation } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -15,6 +15,8 @@ import {
 
 const VideoLesson = () => {
   const { courseId, lessonId } = useParams();
+  const { state } = useLocation();
+  console.log(state)
 
   // Mock lesson data
   const lesson = {
@@ -38,12 +40,8 @@ const VideoLesson = () => {
       <div className="max-w-5xl mx-auto space-y-6">
         {/* Video Player */}
         <Card variant="glow" className="overflow-hidden">
-          <div className="aspect-video bg-gradient-to-br from-space-dark via-primary/10 to-secondary/10 flex items-center justify-center relative">
-            <div className="absolute inset-0 bg-[url('/placeholder.svg')] bg-cover bg-center opacity-20" />
-            <button className="w-20 h-20 rounded-full bg-primary/90 hover:bg-primary flex items-center justify-center transition-all hover:scale-110 z-10 shadow-lg shadow-primary/30">
-              <Play className="w-8 h-8 text-primary-foreground ml-1" fill="currentColor" />
-            </button>
-          </div>
+          <video width="100%" height="auto" controls src={state.lesson.video}>
+          </video>
         </Card>
 
         {/* Lesson Info */}
