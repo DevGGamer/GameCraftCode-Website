@@ -342,7 +342,7 @@ const CurrentCourse = () => {
                       <Button 
                         size="sm" 
                         variant="ghost"
-                        onClick={() => handlePlayVideo(recording.id)}
+                        onClick={() => handlePlayVideo(recording.id, recording)}
                       >
                         <Play className="w-4 h-4 mr-1" />
                         Смотреть
@@ -356,7 +356,7 @@ const CurrentCourse = () => {
             <TabsContent value="description" className="mt-4">
               <Card variant="glass">
                 <CardContent className="p-6">
-                  <p className="text-foreground leading-relaxed">{course.description}</p>
+                  <p className="text-foreground leading-relaxed">{state.course.description}</p>
                 </CardContent>
               </Card>
             </TabsContent>
@@ -397,21 +397,21 @@ const CurrentCourse = () => {
                 <Clock className="w-5 h-5 text-muted-foreground" />
                 <div>
                   <p className="text-sm text-muted-foreground">Длительность</p>
-                  <p className="font-medium text-foreground">{course.duration}</p>
+                  <p className="font-medium text-foreground">{state.course.duration}</p>
                 </div>
               </div>
               <div className="flex items-center gap-3">
                 <Calendar className="w-5 h-5 text-muted-foreground" />
                 <div>
                   <p className="text-sm text-muted-foreground">Дата начала</p>
-                  <p className="font-medium text-foreground">{course.startDate}</p>
+                  <p className="font-medium text-foreground">{state.course.startDate}</p>
                 </div>
               </div>
               <div className="flex items-center gap-3">
                 <BookOpen className="w-5 h-5 text-muted-foreground" />
                 <div>
                   <p className="text-sm text-muted-foreground">Всего уроков</p>
-                  <p className="font-medium text-foreground">{course.totalLessons} уроков</p>
+                  <p className="font-medium text-foreground">{state.course.totalLessons} уроков</p>
                 </div>
               </div>
             </CardContent>
