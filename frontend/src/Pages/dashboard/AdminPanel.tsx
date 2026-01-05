@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback } from "react";
+import { useState, useMemo, useCallback, useEffect } from "react";
 import DashboardLayout from "@/components/dashboard/DashboardLayout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -50,34 +50,72 @@ import {
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
+const host_name = "http://localhost:8000";
 type UserRole = "admin" | "student" | "teacher" | "parent";
 
-interface UserData {
-  id: string;
-  firstName: string;
-  lastName: string;
-  phone: string;
-  email: string;
-  role: UserRole;
-  assignedCourses?: {
-    courseId: string;
-    courseName: string;
-    teacherId: string;
-    teacherName: string;
-    startDate: string;
-  }[];
-  parentId?: string;
-  childrenIds?: string[];
-  teachingCourseIds?: string[];
+const USERS_API_URL = `${host_name}/api/users`;
+const COURSES_API_URL = `${host_name}/api/courses`;
+
+async function fetchUsers(): Promise<User[]> {
+  const res = await fetch(USERS_API_URL, {
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem("token")}`,
+    },
+  });
+  if (!res.ok) throw new Error("Не удалось загрузить пользователей");
+  return res.json();
+}
+
+async function createUserApi(payload: any) {
+  const res = await fetch(USERS_API_URL, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${localStorage.getItem("token")}`,
+    },
+    body: JSON.stringify(payload),
+  });
+  if (!res.ok) throw new Error("Ошибка создания пользователя");
+  return res.json();
+}
+
+async function updateUserApi(userId: string, payload: any) {
+  const res = await fetch(`${USERS_API_URL}/${userId}`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${localStorage.getItem("token")}`,
+    },
+    body: JSON.stringify(payload),
+  });
+  if (!res.ok) throw new Error("Ошибка обновления пользователя");
+  return res.json();
+}
+
+async function deleteUserApi(userId: string) {
+  const res = await fetch(`${USERS_API_URL}/${userId}`, {
+    method: "DELETE",
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem("token")}`,
+    },
+  });
+  if (!res.ok) throw new Error("Ошибка удаления пользователя");
 }
 
 interface FormData {
-  firstName: string;
-  lastName: string;
+  name: string;
+  surname: string;
   phone: string;
   email: string;
+  login: string;
   password: string;
   role: UserRole;
+}
+
+interface Course {
+  id: string;
+  name: string;
+  description: string;
 }
 
 interface CourseAssignment {
@@ -100,101 +138,58 @@ const roleIcons: Record<UserRole, typeof Shield> = {
   parent: Heart,
 };
 
-const mockCourses = [
-  { id: "1", name: "Python для начинающих" },
-  { id: "2", name: "Создание игр на Scratch" },
-  { id: "3", name: "Веб-разработка" },
-  { id: "4", name: "Разработка мобильных приложений" },
-];
+type BaseUser = {
+  id: string;
+  name: string;
+  surname: string;
+  email: string;
+  phone: string;
+  role: "admin" | "student" | "teacher" | "parent";
+};
 
-const initialUsers: UserData[] = [
-  {
-    id: "1",
-    firstName: "Алексей",
-    lastName: "Смирнов",
-    phone: "+7 (999) 123-45-67",
-    email: "alexey@example.com",
-    role: "student",
-    parentId: "4",
-    assignedCourses: [
-      {
-        courseId: "1",
-        courseName: "Python для начинающих",
-        teacherId: "2",
-        teacherName: "Мария Иванова",
-        startDate: "2024-01-15",
-      },
-    ],
-  },
-  {
-    id: "2",
-    firstName: "Мария",
-    lastName: "Иванова",
-    phone: "+7 (999) 234-56-78",
-    email: "maria@example.com",
-    role: "teacher",
-    teachingCourseIds: ["1", "3"],
-  },
-  {
-    id: "3",
-    firstName: "Дмитрий",
-    lastName: "Козлов",
-    phone: "+7 (999) 345-67-89",
-    email: "dmitry@example.com",
-    role: "admin",
-  },
-  {
-    id: "4",
-    firstName: "Елена",
-    lastName: "Волкова",
-    phone: "+7 (999) 456-78-90",
-    email: "elena@example.com",
-    role: "parent",
-    childrenIds: ["1"],
-  },
-  {
-    id: "5",
-    firstName: "Андрей",
-    lastName: "Петров",
-    phone: "+7 (999) 567-89-01",
-    email: "andrey@example.com",
-    role: "teacher",
-    teachingCourseIds: ["2", "4"],
-  },
-  {
-    id: "6",
-    firstName: "Анна",
-    lastName: "Сидорова",
-    phone: "+7 (999) 678-90-12",
-    email: "anna@example.com",
-    role: "student",
-    parentId: "4",
-    assignedCourses: [
-      {
-        courseId: "2",
-        courseName: "Создание игр на Scratch",
-        teacherId: "5",
-        teacherName: "Андрей Петров",
-        startDate: "2024-02-01",
-      },
-    ],
-  },
-];
+type StudentCourseInfo = {
+  course_id: string;
+  teacher_id: string;
+  start_date?: string;
+};
+
+export type StudentUser = BaseUser & {
+  role: "student";
+  parent_id?: string;
+  courses: StudentCourseInfo[];
+};
+
+export type ParentUser = BaseUser & {
+  role: "parent";
+  children: string[];
+};
+
+export type TeacherUser = BaseUser & {
+  role: "teacher";
+  courses: string[];
+};
+
+export type AdminUser = BaseUser & {
+  role: "admin";
+};
+
+export type User = StudentUser | ParentUser | TeacherUser | AdminUser;
 
 const AdminPanel = () => {
   const { toast } = useToast();
-  const [users, setUsers] = useState<UserData[]>(initialUsers);
+  const [users, setUsers] = useState<User[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-  const [selectedUser, setSelectedUser] = useState<UserData | null>(null);
+  const [selectedUser, setSelectedUser] = useState<User | null>(null);
 
   const [formData, setFormData] = useState<FormData>({
-    firstName: "",
-    lastName: "",
+    name: "",
+    surname: "",
     phone: "",
     email: "",
+    login: "",
     password: "",
     role: "student",
   });
@@ -206,6 +201,40 @@ const AdminPanel = () => {
   const [selectedTeachingCourseIds, setSelectedTeachingCourseIds] = useState<
     string[]
   >([]);
+
+  useEffect(() => {
+    const loadUsers = async () => {
+      try {
+        const data = await fetchUsers();
+        console.log(data);
+        setUsers(data);
+      } catch (e) {
+        console.error(e);
+        toast({
+          title: "Ошибка",
+          description: "Не удалось загрузить пользователей",
+          variant: "destructive",
+        });
+      }
+    };
+
+    loadUsers();
+  }, [toast]);
+
+  const [courses, setCourses] = useState<Course[]>([]);
+
+  useEffect(() => {
+    fetch(COURSES_API_URL, {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
+      },
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        console.log("COURSES RESPONSE:", data);
+        setCourses(data);
+      });
+  }, []);
 
   const allStudents = useMemo(
     () => users.filter((u) => u.role === "student"),
@@ -220,7 +249,7 @@ const AdminPanel = () => {
   const getTeachersForCourse = useCallback(
     (courseId: string) => {
       return allTeachers.filter((teacher) =>
-        teacher.teachingCourseIds?.includes(courseId)
+        teacher.courses?.includes(courseId)
       );
     },
     [allTeachers]
@@ -228,17 +257,18 @@ const AdminPanel = () => {
 
   const filteredUsers = users.filter(
     (user) =>
-      user.firstName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      user.lastName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      user.surname.toLowerCase().includes(searchQuery.toLowerCase()) ||
       user.email.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   const resetForm = useCallback(() => {
     setFormData({
-      firstName: "",
-      lastName: "",
+      name: "",
+      surname: "",
       phone: "",
       email: "",
+      login: "",
       password: "",
       role: "student",
     });
@@ -247,183 +277,187 @@ const AdminPanel = () => {
     setSelectedTeachingCourseIds([]);
   }, []);
 
-  const handleCreateUser = useCallback(() => {
-    const newUser: UserData = {
-      id: Date.now().toString(),
-      firstName: formData.firstName,
-      lastName: formData.lastName,
-      phone: formData.phone,
-      email: formData.email,
-      role: formData.role,
-    };
+  const handleCreateUser = useCallback(async () => {
+    try {
+      // Формируем payload в соответствии с backend
+      let payload: any = {
+        role: formData.role,
+        name: formData.name,
+        surname: formData.surname,
+        email: formData.email,
+        phone: formData.phone,
+        login: formData.login,
+        password: formData.password,
+      };
 
-    if (formData.role === "student") {
-      newUser.assignedCourses = courseAssignments.map((ca) => ({
-        ...ca,
-        courseName: mockCourses.find((c) => c.id === ca.courseId)?.name || "",
-        teacherName:
-          allTeachers.find((t) => t.id === ca.teacherId)?.firstName +
-            " " +
-            allTeachers.find((t) => t.id === ca.teacherId)?.lastName || "",
-      }));
-    } else if (formData.role === "parent") {
-      newUser.childrenIds = selectedChildrenIds;
-    } else if (formData.role === "teacher") {
-      newUser.teachingCourseIds = selectedTeachingCourseIds;
+      if (formData.role === "student") {
+        payload.parent_id = selectedChildrenIds[0] || null;
+        payload.courses = courseAssignments.map((ca) => ({
+          course_id: ca.courseId,
+          teacher_id: ca.teacherId,
+          start_date: ca.startDate,
+        }));
+      } else if (formData.role === "parent") {
+        payload.children = selectedChildrenIds;
+      } else if (formData.role === "teacher") {
+        payload.courses = selectedTeachingCourseIds;
+      }
+
+      await createUserApi(payload);
+
+      // Сразу обновляем список пользователей
+      const updatedUsers = await fetchUsers();
+      setUsers(updatedUsers);
+
+      setIsCreateDialogOpen(false);
+      resetForm();
+      toast({
+        title: "Пользователь создан",
+        description: `${formData.name} ${formData.surname} успешно добавлен`,
+      });
+    } catch (e) {
+      console.error(e);
+      toast({
+        title: "Ошибка",
+        description: "Не удалось создать пользователя",
+        variant: "destructive",
+      });
     }
-
-    let updatedUsers = [...users, newUser];
-    if (formData.role === "parent" && selectedChildrenIds.length > 0) {
-      updatedUsers = updatedUsers.map((u) =>
-        selectedChildrenIds.includes(u.id) ? { ...u, parentId: newUser.id } : u
-      );
-    }
-
-    setUsers(updatedUsers);
-    setIsCreateDialogOpen(false);
-    resetForm();
-    toast({
-      title: "Пользователь создан",
-      description: `${newUser.firstName} ${newUser.lastName} успешно добавлен`,
-    });
   }, [
     formData,
     courseAssignments,
     selectedChildrenIds,
     selectedTeachingCourseIds,
-    users,
-    allTeachers,
     resetForm,
     toast,
   ]);
 
-  const handleEditUser = useCallback(() => {
+  const handleEditUser = useCallback(async () => {
     if (!selectedUser) return;
 
-    let updatedUsers = users.map((user) => {
-      if (user.id === selectedUser.id) {
-        const updatedUser: UserData = {
-          ...user,
-          firstName: formData.firstName,
-          lastName: formData.lastName,
-          phone: formData.phone,
-          email: formData.email,
-          role: formData.role,
-        };
+    try {
+      let payload: any = {
+        login: formData.login,
+        password: formData.password,
+        role: formData.role,
+        name: formData.name,
+        surname: formData.surname,
+        email: formData.email,
+        phone: formData.phone,
+      };
 
-        if (formData.role === "student") {
-          updatedUser.assignedCourses = courseAssignments.map((ca) => ({
-            ...ca,
-            courseName:
-              mockCourses.find((c) => c.id === ca.courseId)?.name || "",
-            teacherName:
-              allTeachers.find((t) => t.id === ca.teacherId)?.firstName +
-                " " +
-                allTeachers.find((t) => t.id === ca.teacherId)?.lastName || "",
-          }));
-          delete updatedUser.childrenIds;
-          delete updatedUser.teachingCourseIds;
-        } else if (formData.role === "parent") {
-          updatedUser.childrenIds = selectedChildrenIds;
-          delete updatedUser.assignedCourses;
-          delete updatedUser.teachingCourseIds;
-        } else if (formData.role === "teacher") {
-          updatedUser.teachingCourseIds = selectedTeachingCourseIds;
-          delete updatedUser.assignedCourses;
-          delete updatedUser.childrenIds;
-        } else {
-          delete updatedUser.assignedCourses;
-          delete updatedUser.childrenIds;
-          delete updatedUser.teachingCourseIds;
-        }
-
-        return updatedUser;
+      if (formData.role === "student") {
+        payload.parent_id = selectedChildrenIds[0] || null;
+        payload.courses = courseAssignments.map((ca) => ({
+          course_id: ca.courseId,
+          teacher_id: ca.teacherId,
+          start_date: ca.startDate,
+        }));
+      } else if (formData.role === "parent") {
+        payload.children = selectedChildrenIds;
+      } else if (formData.role === "teacher") {
+        payload.courses = selectedTeachingCourseIds;
       }
-      return user;
-    });
 
-    if (formData.role === "parent") {
-      updatedUsers = updatedUsers.map((u) =>
-        u.parentId === selectedUser.id ? { ...u, parentId: undefined } : u
-      );
-      updatedUsers = updatedUsers.map((u) =>
-        selectedChildrenIds.includes(u.id)
-          ? { ...u, parentId: selectedUser.id }
-          : u
-      );
+      await updateUserApi(selectedUser.id, payload);
+
+      // Обновляем список
+      const updatedUsers = await fetchUsers();
+      setUsers(updatedUsers);
+
+      setIsEditDialogOpen(false);
+      setSelectedUser(null);
+      resetForm();
+      toast({
+        title: "Пользователь обновлён",
+        description: "Данные успешно сохранены",
+      });
+    } catch (e) {
+      console.error(e);
+      toast({
+        title: "Ошибка",
+        description: "Не удалось обновить пользователя",
+        variant: "destructive",
+      });
     }
-
-    setUsers(updatedUsers);
-    setIsEditDialogOpen(false);
-    setSelectedUser(null);
-    resetForm();
-    toast({
-      title: "Пользователь обновлён",
-      description: "Данные успешно сохранены",
-    });
   }, [
     selectedUser,
     formData,
     courseAssignments,
     selectedChildrenIds,
     selectedTeachingCourseIds,
-    users,
-    allTeachers,
     resetForm,
     toast,
   ]);
 
-  const handleDeleteUser = useCallback(() => {
+  const handleDeleteUser = useCallback(async () => {
     if (!selectedUser) return;
 
-    let updatedUsers = users.filter((user) => user.id !== selectedUser.id);
+    try {
+      await deleteUserApi(selectedUser.id);
 
-    if (selectedUser.role === "parent") {
-      updatedUsers = updatedUsers.map((u) =>
-        u.parentId === selectedUser.id ? { ...u, parentId: undefined } : u
-      );
+      // Обновляем список
+      const updatedUsers = await fetchUsers();
+      setUsers(updatedUsers);
+
+      setIsDeleteDialogOpen(false);
+      setSelectedUser(null);
+      toast({
+        title: "Пользователь удалён",
+        description: `${selectedUser.name} ${selectedUser.surname} удалён из системы`,
+        variant: "destructive",
+      });
+    } catch (e) {
+      console.error(e);
+      toast({
+        title: "Ошибка",
+        description: "Не удалось удалить пользователя",
+        variant: "destructive",
+      });
     }
+  }, [selectedUser, toast]);
 
-    if (selectedUser.role === "student") {
-      updatedUsers = updatedUsers.map((u) => ({
-        ...u,
-        childrenIds: u.childrenIds?.filter((id) => id !== selectedUser.id),
-      }));
-    }
-
-    setUsers(updatedUsers);
-    setIsDeleteDialogOpen(false);
-    setSelectedUser(null);
-    toast({
-      title: "Пользователь удалён",
-      description: `${selectedUser.firstName} ${selectedUser.lastName} удалён из системы`,
-      variant: "destructive",
-    });
-  }, [selectedUser, users, toast]);
-
-  const openEditDialog = useCallback((user: UserData) => {
+  const openEditDialog = useCallback((user: User) => {
     setSelectedUser(user);
+
     setFormData({
-      firstName: user.firstName,
-      lastName: user.lastName,
+      name: user.name,
+      surname: user.surname,
       phone: user.phone,
       email: user.email,
+      login: "",
       password: "",
       role: user.role,
     });
-    setCourseAssignments(
-      user.assignedCourses?.map((ac) => ({
-        courseId: ac.courseId,
-        teacherId: ac.teacherId,
-        startDate: ac.startDate,
-      })) || []
-    );
-    setSelectedChildrenIds(user.childrenIds || []);
-    setSelectedTeachingCourseIds(user.teachingCourseIds || []);
+
+    if (user.role === "teacher") {
+      setSelectedTeachingCourseIds(user.courses || []);
+    } else {
+      setSelectedTeachingCourseIds([]);
+    }
+
+    if (user.role === "parent") {
+      setSelectedChildrenIds(user.children || []);
+    } else {
+      setSelectedChildrenIds([]);
+    }
+
+    if (user.role === "student") {
+      setCourseAssignments(
+        user.courses?.map((c) => ({
+          courseId: c.course_id,
+          teacherId: c.teacher_id,
+          startDate: c.start_date || "",
+        })) || []
+      );
+    } else {
+      setCourseAssignments([]);
+    }
+
     setIsEditDialogOpen(true);
   }, []);
 
-  const openDeleteDialog = useCallback((user: UserData) => {
+  const openDeleteDialog = useCallback((user: User) => {
     setSelectedUser(user);
     setIsDeleteDialogOpen(true);
   }, []);
@@ -477,8 +511,10 @@ const AdminPanel = () => {
   const getParentName = useCallback(
     (parentId?: string) => {
       if (!parentId) return null;
-      const parent = users.find((u) => u.id === parentId);
-      return parent ? `${parent.firstName} ${parent.lastName}` : null;
+      const parent = users.find(
+        (u) => u.id === parentId && u.role === "parent"
+      );
+      return parent ? `${parent.name} ${parent.surname}` : null;
     },
     [users]
   );
@@ -488,8 +524,8 @@ const AdminPanel = () => {
       if (!childrenIds || childrenIds.length === 0) return null;
       return childrenIds
         .map((id) => {
-          const child = users.find((u) => u.id === id);
-          return child ? `${child.firstName} ${child.lastName}` : null;
+          const child = users.find((u) => u.id === id && u.role === "student");
+          return child ? `${child.name} ${child.surname}` : null;
         })
         .filter(Boolean)
         .join(", ");
@@ -497,25 +533,28 @@ const AdminPanel = () => {
     [users]
   );
 
-  const getTeachingCourseNames = useCallback((courseIds?: string[]) => {
-    if (!courseIds || courseIds.length === 0) return null;
-    return courseIds
-      .map((id) => mockCourses.find((c) => c.id === id)?.name)
-      .filter(Boolean)
-      .join(", ");
-  }, []);
+  const getTeachingCourseNames = useCallback(
+    (user: User) => {
+      if (user.role !== "teacher" || !user.courses) return null;
+      return user.courses
+        .map((courseId) => courses.find((c) => c.id === courseId)?.name)
+        .filter(Boolean)
+        .join(", ");
+    },
+    [courses]
+  );
 
   // Form field change handlers - using stable callbacks
   const handleFirstNameChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
-      setFormData((prev) => ({ ...prev, firstName: e.target.value }));
+      setFormData((prev) => ({ ...prev, name: e.target.value }));
     },
     []
   );
 
   const handleLastNameChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
-      setFormData((prev) => ({ ...prev, lastName: e.target.value }));
+      setFormData((prev) => ({ ...prev, surname: e.target.value }));
     },
     []
   );
@@ -530,6 +569,13 @@ const AdminPanel = () => {
   const handleEmailChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
       setFormData((prev) => ({ ...prev, email: e.target.value }));
+    },
+    []
+  );
+
+  const handleLoginChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      setFormData((prev) => ({ ...prev, login: e.target.value }));
     },
     []
   );
@@ -597,10 +643,10 @@ const AdminPanel = () => {
                     className="border-border/30 hover:bg-card/50"
                   >
                     <TableCell className="font-medium text-foreground">
-                      {user.firstName}
+                      {user.name}
                     </TableCell>
                     <TableCell className="text-foreground">
-                      {user.lastName}
+                      {user.surname}
                     </TableCell>
                     <TableCell className="text-muted-foreground">
                       {user.phone}
@@ -625,32 +671,35 @@ const AdminPanel = () => {
                       </span>
                     </TableCell>
                     <TableCell className="text-xs text-muted-foreground max-w-[200px]">
-                      {user.role === "student" && user.parentId && (
-                        <div className="flex items-center gap-1">
-                          <Heart className="w-3 h-3 text-pink-500" />
-                          <span className="truncate">
-                            Родитель: {getParentName(user.parentId)}
-                          </span>
-                        </div>
-                      )}
+                      {user.role === "student" &&
+                        (user as StudentUser).parent_id && (
+                          <div className="flex items-center gap-1">
+                            <Heart className="w-3 h-3 text-pink-500" />
+                            <span className="truncate">
+                              Родитель:{" "}
+                              {getParentName((user as StudentUser).parent_id)}
+                            </span>
+                          </div>
+                        )}
+
                       {user.role === "parent" &&
-                        user.childrenIds &&
-                        user.childrenIds.length > 0 && (
+                        (user as ParentUser).children &&
+                        (user as ParentUser).children.length > 0 && (
                           <div className="flex items-center gap-1">
                             <GraduationCap className="w-3 h-3 text-secondary" />
                             <span className="truncate">
-                              Дети: {getChildrenNames(user.childrenIds)}
+                              Дети:{" "}
+                              {getChildrenNames((user as ParentUser).children)}
                             </span>
                           </div>
                         )}
                       {user.role === "teacher" &&
-                        user.teachingCourseIds &&
-                        user.teachingCourseIds.length > 0 && (
+                        user.courses &&
+                        user.courses.length > 0 && (
                           <div className="flex items-center gap-1">
                             <BookOpen className="w-3 h-3 text-primary" />
                             <span className="truncate">
-                              Курсы:{" "}
-                              {getTeachingCourseNames(user.teachingCourseIds)}
+                              Курсы: {getTeachingCourseNames(user)}
                             </span>
                           </div>
                         )}
@@ -705,19 +754,19 @@ const AdminPanel = () => {
           <div className="space-y-6">
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="create-firstName">Имя</Label>
+                <Label htmlFor="create-name">Имя</Label>
                 <Input
-                  id="create-firstName"
-                  value={formData.firstName}
+                  id="create-name"
+                  value={formData.name}
                   onChange={handleFirstNameChange}
                   placeholder="Введите имя"
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="create-lastName">Фамилия</Label>
+                <Label htmlFor="create-surname">Фамилия</Label>
                 <Input
-                  id="create-lastName"
-                  value={formData.lastName}
+                  id="create-surname"
+                  value={formData.surname}
                   onChange={handleLastNameChange}
                   placeholder="Введите фамилию"
                 />
@@ -747,6 +796,16 @@ const AdminPanel = () => {
             </div>
 
             <div className="space-y-2">
+              <Label htmlFor="create-login">Логин</Label>
+              <Input
+                id="create-login"
+                value={formData.login}
+                onChange={handleLoginChange}
+                placeholder="Введите логин"
+              />
+
+              <div></div>
+
               <Label htmlFor="create-password">Пароль</Label>
               <Input
                 id="create-password"
@@ -783,7 +842,7 @@ const AdminPanel = () => {
                   Выберите курсы, которые ведёт преподаватель
                 </p>
                 <div className="grid grid-cols-2 gap-3">
-                  {mockCourses.map((course) => (
+                  {courses.map((course) => (
                     <label
                       key={course.id}
                       className={`flex items-center gap-3 p-3 rounded-lg cursor-pointer transition-all ${
@@ -837,7 +896,7 @@ const AdminPanel = () => {
                         />
                         <div className="flex-1">
                           <span className="text-sm font-medium">
-                            {student.firstName} {student.lastName}
+                            {student.name} {student.surname}
                           </span>
                           <span className="text-xs text-muted-foreground ml-2">
                             {student.email}
@@ -892,7 +951,7 @@ const AdminPanel = () => {
                               <SelectValue placeholder="Выберите курс" />
                             </SelectTrigger>
                             <SelectContent>
-                              {mockCourses.map((course) => (
+                              {courses.map((course) => (
                                 <SelectItem key={course.id} value={course.id}>
                                   {course.name}
                                 </SelectItem>
@@ -925,7 +984,7 @@ const AdminPanel = () => {
                             <SelectContent>
                               {availableTeachers.map((teacher) => (
                                 <SelectItem key={teacher.id} value={teacher.id}>
-                                  {teacher.firstName} {teacher.lastName}
+                                  {teacher.name} {teacher.surname}
                                 </SelectItem>
                               ))}
                             </SelectContent>
@@ -1008,7 +1067,7 @@ const AdminPanel = () => {
                 <Label htmlFor="edit-firstName">Имя</Label>
                 <Input
                   id="edit-firstName"
-                  value={formData.firstName}
+                  value={formData.name}
                   onChange={handleFirstNameChange}
                   placeholder="Введите имя"
                 />
@@ -1017,7 +1076,7 @@ const AdminPanel = () => {
                 <Label htmlFor="edit-lastName">Фамилия</Label>
                 <Input
                   id="edit-lastName"
-                  value={formData.lastName}
+                  value={formData.surname}
                   onChange={handleLastNameChange}
                   placeholder="Введите фамилию"
                 />
@@ -1072,7 +1131,7 @@ const AdminPanel = () => {
                   Выберите курсы, которые ведёт преподаватель
                 </p>
                 <div className="grid grid-cols-2 gap-3">
-                  {mockCourses.map((course) => (
+                  {courses.map((course) => (
                     <label
                       key={course.id}
                       className={`flex items-center gap-3 p-3 rounded-lg cursor-pointer transition-all ${
@@ -1129,7 +1188,7 @@ const AdminPanel = () => {
                           />
                           <div className="flex-1">
                             <span className="text-sm font-medium">
-                              {student.firstName} {student.lastName}
+                              {student.name} {student.surname}
                             </span>
                             <span className="text-xs text-muted-foreground ml-2">
                               {student.email}
@@ -1159,10 +1218,6 @@ const AdminPanel = () => {
                   </Button>
                 </div>
 
-                <p className="text-sm text-muted-foreground">
-                  💡 Преподаватели фильтруются по выбранному курсу
-                </p>
-
                 {courseAssignments.map((assignment, index) => {
                   const availableTeachers = assignment.courseId
                     ? getTeachersForCourse(assignment.courseId)
@@ -1188,7 +1243,7 @@ const AdminPanel = () => {
                               <SelectValue placeholder="Выберите курс" />
                             </SelectTrigger>
                             <SelectContent>
-                              {mockCourses.map((course) => (
+                              {courses.map((course) => (
                                 <SelectItem key={course.id} value={course.id}>
                                   {course.name}
                                 </SelectItem>
@@ -1221,7 +1276,7 @@ const AdminPanel = () => {
                             <SelectContent>
                               {availableTeachers.map((teacher) => (
                                 <SelectItem key={teacher.id} value={teacher.id}>
-                                  {teacher.firstName} {teacher.lastName}
+                                  {teacher.name} {teacher.surname}
                                 </SelectItem>
                               ))}
                             </SelectContent>
@@ -1298,9 +1353,8 @@ const AdminPanel = () => {
               Удалить пользователя?
             </AlertDialogTitle>
             <AlertDialogDescription>
-              Вы уверены, что хотите удалить пользователя{" "}
-              {selectedUser?.firstName} {selectedUser?.lastName}? Это действие
-              нельзя отменить.
+              Вы уверены, что хотите удалить пользователя {selectedUser?.name}{" "}
+              {selectedUser?.surname}? Это действие нельзя отменить.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
