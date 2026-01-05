@@ -3,12 +3,12 @@ from fastapi.middleware.cors import CORSMiddleware
 from .database import SessionLocal, Base, engine
 from .auth import generate_token, verify_token
 from datetime import datetime, timedelta, date
-from .models import Users, Courses, UserAchievement, UserActivity
+from .models import Users, UserCourses, UserAchievement, UserActivity, ParentStudent, TeacherInfo
 from sqlalchemy.orm import Session
 from sqlalchemy import text
 from minio.error import S3Error
 from pydantic import BaseModel
-from typing import Optional
+from typing import Literal, Optional, Union
 from minio import Minio
 from typing import List
 import json
@@ -34,16 +34,6 @@ def get_db():
     finally:
         db.close()
 
-class AddUserRequest(BaseModel):
-    login: str
-    password: str
-    name: str
-    surname: str
-    email: str
-    role: str
-    phone: str
-    birth_date: date
-
 class LoginRequest(BaseModel):
     login: str
     password: str
@@ -55,6 +45,42 @@ class UserInfoRequest(BaseModel):
     phone: str | None
     birthDate : date | None
     avatar: UploadFile | None
+
+class UserBaseDTO(BaseModel):
+    id: int
+    name: str
+    surname: str
+    email: str | None
+    phone: str | None
+    role: str
+
+class StudentCourseDTO(BaseModel):
+    course_id: str
+    teacher_id: int
+    start_date: date
+
+class StudentDTO(UserBaseDTO):
+    parent_id: int | None
+    courses: list[StudentCourseDTO]
+
+class ParentDTO(UserBaseDTO):
+    children: list[int]  # student ids
+
+class TeacherDTO(UserBaseDTO):
+    role: Literal["teacher"]
+    courses: list[str] # course ids
+
+class AdminDTO(UserBaseDTO):
+    pass
+
+UserResponseDTO = Union[
+    StudentDTO,
+    ParentDTO,
+    TeacherDTO,
+    AdminDTO
+]
+
+
 
 # Простейший rate limiter (для примера)
 login_attempts = {}
@@ -245,64 +271,308 @@ def update_user_profile(
     db.commit()
 
     return {"message": "Профиль обновлён"}
-    
 
-@app.post("/api/add_user")
-async def submit_form(data: AddUserRequest, db: Session = Depends(get_db)):
-    db: Session = SessionLocal()
+class UserBaseIn(BaseModel):
+    login: str
+    password: str
+    name: str
+    surname: str
+    email: str
+    phone: str
+    role: Literal["admin", "student", "teacher", "parent"]
 
-    user = db.query(Users).filter_by(login=data.login).first()
+class StudentCourseIn(BaseModel):
+    course_id: str
+    teacher_id: int
+    start_date: date
 
+class StudentIn(UserBaseIn):
+    role: Literal["student"]
+    parent_id: int | None = None
+    courses: list[StudentCourseIn] = []
+
+class ParentIn(UserBaseIn):
+    role: Literal["parent"]
+    children: list[int] = []
+
+class TeacherIn(UserBaseIn):
+    role: Literal["teacher"]
+    courses: list[str] = []
+
+class AdminIn(UserBaseIn):
+    role: Literal["admin"]
+
+UserCreateDTO = Union[
+    StudentIn,
+    ParentIn,
+    TeacherIn,
+    AdminIn
+]
+
+@app.post("/api/users", response_model=UserResponseDTO)
+def create_user(
+    payload: UserCreateDTO,
+    db: Session = Depends(get_db)
+):
+    user = Users(
+        login=payload.login,
+        password = payload.password,
+        name=payload.name,
+        surname=payload.surname,
+        email=payload.email,
+        phone=payload.phone,
+        role=payload.role
+    )
+    db.add(user)
+    db.commit()
+    db.refresh(user)
+
+    # STUDENT
+    if payload.role == "student":
+        if payload.parent_id:
+            db.add(ParentStudent(
+                parent_id=payload.parent_id,
+                student_id=user.id
+            ))
+
+        for c in payload.courses:
+            db.add(UserCourses(
+                student_id=user.id,
+                teacher_id=c.teacher_id,
+                course_id=c.course_id,
+                start_date = c.start_date
+            ))
+
+    # PARENT
+    elif payload.role == "parent":
+        for student_id in payload.children:
+            db.add(ParentStudent(
+                parent_id=user.id,
+                student_id=student_id
+            ))
+
+    # TEACHER
+    elif payload.role == "teacher":
+        for course_id in payload.courses:
+            db.add(TeacherInfo(
+                teacher_id=user.id,
+                course_id=course_id
+            ))
+
+    db.commit()
+
+    return build_user_dto(user, db)
+
+@app.put("/api/users/{user_id}", response_model=UserResponseDTO)
+def update_user(
+    user_id: int,
+    payload: UserCreateDTO,
+    db: Session = Depends(get_db)
+):
+    user = db.query(Users).get(user_id)
     if not user:
-        user = Users(
-            login=data.login,
-            password = data.password,
-            name=data.name,
-            surname=data.surname,
-            email=data.email,
-            role=data.role,
-            phone=data.phone,
-            birth_date=data.birth_date,
+        raise HTTPException(404, "User not found")
 
-        )
-        db.add(user)
-        db.commit()
+    old_role = user.role
+    new_role = payload.role
 
-    db.close()
-    return {"status": "ok"}
+    # обновляем базовые поля
+    user.name = payload.name
+    user.surname = payload.surname
+    user.email = payload.email
+    user.phone = payload.phone
 
-@app.get("/api/user/image/")
-@app.get("/api/user/image/{id}")
-def get_user_image(id: Optional[int] = None, payload: dict = Depends(verify_token), db: Session = Depends(get_db)):
-    if (id is None):
-        bucket_name = payload['login']
-    else:
-        user = db.query(Users).filter(Users.id == id).first()
-        bucket_name = user.login
-    object_name = "фото.jpg"
+    # 🧹 чистим связи ПО СТАРОЙ РОЛИ
+    if old_role == "student":
+        db.query(UserCourses).filter(
+            UserCourses.student_id == user_id
+        ).delete(synchronize_session=False)
 
-    # проверяем бакет и объект
-    if not minio_client.bucket_exists(bucket_name):
-        raise HTTPException(status_code=404, detail="Бакет пользователя не найден")
+        db.query(ParentStudent).filter(
+            ParentStudent.student_id == user_id
+        ).delete(synchronize_session=False)
+
+    elif old_role == "parent":
+        db.query(ParentStudent).filter(
+            ParentStudent.parent_id == user_id
+        ).delete(synchronize_session=False)
+
+    elif old_role == "teacher":
+        db.query(TeacherInfo).filter(
+            TeacherInfo.teacher_id == user_id
+        ).delete(synchronize_session=False)
+
+    # 🔁 меняем роль
+    user.role = new_role
+
+    # 🧩 создаём связи ПО НОВОЙ РОЛИ
+    if new_role == "student":
+        if payload.parent_id:
+            db.add(ParentStudent(
+                parent_id=payload.parent_id,
+                student_id=user_id
+            ))
+
+        for c in payload.courses:
+            db.add(UserCourses(
+                student_id=user_id,
+                teacher_id=c.teacher_id,
+                course_id=c.course_id,
+                start_date = c.start_date
+            ))
+
+    elif new_role == "parent":
+        for student_id in payload.children:
+            db.add(ParentStudent(
+                parent_id=user_id,
+                student_id=student_id
+            ))
+
+    elif new_role == "teacher":
+        for course_id in payload.courses:
+            db.add(TeacherInfo(
+                teacher_id=user_id,
+                course_id=course_id
+            ))
+
+    db.commit()
+    db.refresh(user)
+
+    return build_user_dto(user, db)
+
+@app.delete("/api/users/{user_id}", status_code=204)
+def delete_user(
+    user_id: int,
+    db: Session = Depends(get_db)
+):
+    user = db.query(Users).get(user_id)
+    if not user:
+        raise HTTPException(404, "User not found")
+
+    # удаляем связи
+    db.query(ParentStudent).filter(
+        (ParentStudent.parent_id == user_id) |
+        (ParentStudent.student_id == user_id)
+    ).delete(synchronize_session=False)
+
+    db.query(UserCourses).filter(
+        (UserCourses.student_id == user_id) |
+        (UserCourses.teacher_id == user_id)
+    ).delete(synchronize_session=False)
+
+    db.query(TeacherInfo).filter(
+        TeacherInfo.teacher_id == user_id
+    ).delete(synchronize_session=False)
+
+    delete_avatar(user.id)
+
+    db.delete(user)
+    db.commit()
+
+def delete_avatar(user_id: int) -> bool:
+    object_name = f"{user_id}/avatar.png"
+
     try:
-        minio_client.stat_object(bucket_name, object_name)
-    except Exception:
-        raise HTTPException(status_code=404, detail="Изображение не найдено")
+        minio_client.stat_object("users", object_name)
+        minio_client.remove_object("users", object_name)
+        return True
+    except S3Error:
+        return False
 
-    # генерируем presigned URL на 1 час (3600 секунд)
-    image_url = minio_client.get_presigned_url(
-        "GET",
-        bucket_name,
-        object_name,
-        expires=timedelta(seconds=3600)
+@app.get("/api/users", response_model=list[UserResponseDTO])
+def get_users(payload: dict = Depends(verify_token), db: Session = Depends(get_db)):
+    users = db.query(Users).all()
+    return [build_user_dto(user, db) for user in users]
+
+@app.get("/api/users/{user_id}", response_model=UserResponseDTO)
+def get_user(
+    user_id: int,
+    payload: dict = Depends(verify_token),
+    db: Session = Depends(get_db)
+):
+    return get_user_by_id(user_id, db)
+
+def build_user_dto(user: Users, db: Session) -> UserResponseDTO:
+    if user.role == "student":
+        parent = (
+            db.query(ParentStudent.parent_id)
+            .filter(ParentStudent.student_id == user.id)
+            .first()
+        )
+
+        courses = (
+            db.query(UserCourses)
+            .filter(UserCourses.student_id == user.id)
+            .all()
+        )
+
+        return StudentDTO(
+            id=user.id,
+            name=user.name,
+            surname=user.surname,
+            email=user.email,
+            phone=user.phone,
+            role=user.role,
+            parent_id=parent.parent_id if parent else None,
+            courses=[
+                StudentCourseDTO(
+                    course_id=uc.course_id,
+                    teacher_id=uc.teacher_id,
+                    start_date=uc.start_date
+                )
+                for uc in courses
+            ]
+        )
+
+    if user.role == "parent":
+        children = (
+            db.query(ParentStudent.student_id)
+            .filter(ParentStudent.parent_id == user.id)
+            .all()
+        )
+
+        return ParentDTO(
+            id=user.id,
+            name=user.name,
+            surname=user.surname,
+            email=user.email,
+            phone=user.phone,
+            role=user.role,
+            children=[c.student_id for c in children]
+        )
+
+    if user.role == "teacher":
+        courses = (
+            db.query(TeacherInfo.course_id)
+            .filter(TeacherInfo.teacher_id == user.id)
+            .all()
+        )
+
+        return TeacherDTO(
+            id=user.id,
+            name=user.name,
+            surname=user.surname,
+            email=user.email,
+            phone=user.phone,
+            role=user.role,
+            courses=[c.course_id for c in courses]
+        )
+
+    return AdminDTO(
+        id=user.id,
+        name=user.name,
+        surname=user.surname,
+        email=user.email,
+        phone=user.phone,
+        role=user.role
     )
 
-    return {"imageUrl": image_url}
+def get_user_by_id(user_id: int, db: Session) -> UserResponseDTO:
+    user = db.query(Users).get(user_id)
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
 
-@app.get("/api/users")
-def get_users(db: Session = Depends(get_db)):
-    students = db.query(Users).filter(Users.role == "student").all()
-    return students
+    return build_user_dto(user, db)
 
 @app.get("/api/teachers")
 def get_users(db: Session = Depends(get_db)):
@@ -311,17 +581,24 @@ def get_users(db: Session = Depends(get_db)):
 
 @app.get("/api/courses")
 def get_courses(payload: dict = Depends(verify_token)):
-    all_courses_data = []
+    courses = []
 
     for obj in minio_client.list_objects("courses", recursive=False):
-        file_data = minio_client.get_object("courses", f"{obj.object_name}passport.json")
-        data = json.loads(file_data.read().decode("utf-8"))
+        file_data = minio_client.get_object(
+            "courses",
+            f"{obj.object_name}passport.json"
+        )
+        data = json.loads(file_data.read())
         file_data.close()
         file_data.release_conn()
-        #for key, info in data.items():
-        all_courses_data.append({"name": data[0]["name"], "description": data[0]["description"] })
-        
-    return all_courses_data
+
+        courses.append({
+            "id": obj.object_name,
+            "name": data[0]["name"],
+            "description": data[0]["description"],
+        })
+
+    return courses
 
 @app.get("/api/user_course/")
 @app.get("/api/user_course/{student_id}")
@@ -329,12 +606,12 @@ def get_courses(student_id: Optional[int] = None, payload: dict = Depends(verify
     if (student_id is None):
         student_id = payload["id"]
     cours=[]
-    courses = db.query(Courses).filter(Courses.student_id == student_id).all()
+    courses = db.query(UserCourses).filter(UserCourses.student_id == student_id).all()
 
     for course in courses:
         teacher = db.query(Users).filter(Users.id == course.teacher_id).first()
         avatar_t = get_avatar_url(teacher.id)
-        file_data = minio_client.get_object("courses", f"{course.course_name}/passport.json")
+        file_data = minio_client.get_object("courses", f"{course.course_id}passport.json")
         data = json.loads(file_data.read().decode("utf-8"))
         file_data.close()
         file_data.release_conn()
@@ -342,7 +619,7 @@ def get_courses(student_id: Optional[int] = None, payload: dict = Depends(verify
         k=0
         com=0
         for i, module in enumerate(data2.get("modules", [])):
-            prefix = f"{course.course_name}/Module{module['id']}/"
+            prefix = f"{course.course_id}Module{module['id']}/"
             objects = minio_client.list_objects("courses", prefix=prefix, recursive=True)
             l=0
             for obj in objects:
@@ -374,7 +651,7 @@ def get_courses(student_id: Optional[int] = None, payload: dict = Depends(verify
             active = True
         c = {"title": data[0]["title"], "level": data[0]["level"], "description": data[0]["description"], 
              "duration": data[0]["duration"], "teacher_id": course.teacher_id, "completedLessons": com, 
-             "totalLessons": k, "progress": progr, "isActive": active, "name": course.course_name, "startDate": course.start_date,
+             "totalLessons": k, "progress": progr, "isActive": active, "name": course.course_id, "startDate": course.start_date,
              "instructor": { "surname": teacher.surname, "name": teacher.name, "title": "Senior Python Developer", "avatar": avatar_t }, 
              "modules": data2["modules"]}
         cours.append(c)
@@ -385,7 +662,7 @@ def get_courses(student_id: Optional[int] = None, payload: dict = Depends(verify
 def get_courses(student_id: int, course_name: str, block_number: int, teacher_id: str, payload: dict = Depends(verify_token), db: Session = Depends(get_db)):
     db: Session = SessionLocal()
 
-    user = Courses(
+    user = UserCourses(
         student_id=student_id,
         completed_lessons = 0,
         teacher_id=teacher_id,
@@ -400,80 +677,6 @@ def get_courses(student_id: int, course_name: str, block_number: int, teacher_id
 
     return {"status": "ok"}
 
-@app.get("/api/coursesf")
-def get_coursesf(payload: dict = Depends(verify_token)):
-    BUCKET_COURSES = "courses"
-    try:
-        # Словарь: {курс: [уроки]}
-        courses_map: Dict[str, List[Dict]] = {}
-
-        # Получаем все объекты в бакете
-        objects = minio_client.list_objects(BUCKET_COURSES, recursive=True)
-        for obj in objects:
-            # Пример obj.object_name: "python/C1/L1.mp4"
-            parts = obj.object_name.split("/")
-            if len(parts) < 3:
-                continue  # игнорируем некорректные пути
-
-            course_name = parts[0]      # python
-            chapter_name = parts[1]     # C1
-            lesson_file = parts[2]      # L1.mp4
-
-            course_key = f"{course_name}/{chapter_name}"
-            if course_key not in courses_map:
-                courses_map[course_key] = []
-
-            # создаем presigned URL для видео
-            video_url = minio_client.get_presigned_url(
-                "GET",
-                BUCKET_COURSES,
-                obj.object_name,
-                expires=3600  # 1 час
-            )
-
-            courses_map[course_key].append({
-                "title": lesson_file,
-                "video": video_url
-            })
-
-        # Преобразуем словарь в список для фронтенда
-        courses_list = []
-        for course, lessons in courses_map.items():
-            courses_list.append({
-                "course": course,
-                "lessons": lessons
-            })
-
-        return {"courses": courses_list}
-
-    except Exception as e:
-        print(e)
-        raise HTTPException(status_code=500, detail="Ошибка сервера")
-
-@app.get("/api/lessons/{student_name}")
-def get_lessons(student_name: str):
-    db: Session = SessionLocal()
-    student = db.query(Users).filter(Users.name == student_name).first()
-    if not student:
-        db.close()
-        raise HTTPException(status_code=404, detail="Student not found")
-
-    # Получаем все уроки ученика, упорядоченные по order
-    student_lessons = db.query(Lesson).filter(Lesson.student_id == student.id)\
-                          .order_by(Lesson.order).all()
-
-    result = []
-    for i, lesson in enumerate(student_lessons):
-        accessible = True if i == 0 or student_lessons[i-1].completed else False
-        result.append({
-            "id": lesson.id,
-            "title": f"Lesson {lesson.order}",
-            "video_name": lesson.video_name,
-            "completed": lesson.completed,
-            "accessible": accessible
-        })
-    db.close()
-    return result
 
 @app.post("/api/lessons/{student_name}/{lesson_id}/start")
 def start_lesson(student_name: str, lesson_id: int):
