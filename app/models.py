@@ -35,7 +35,7 @@ class UserCourses(Base):
     teacher_id = Column(Integer, ForeignKey("users.id"))
     course_id = Column(String, nullable=False)
     start_date = Column(Date, nullable=False)
-    completed_lessons = Column(JSONB, default=dict)
+    completed_lessons = Column(JSONB)
 
     student = relationship("Users", foreign_keys=[student_id])
     teacher = relationship("Users", foreign_keys=[teacher_id])
