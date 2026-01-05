@@ -364,7 +364,7 @@ def get_courses(student_id: Optional[int] = None, payload: dict = Depends(verify
                 data2["modules"][i]["status"] = "completed"
             else:
                 data2["modules"][i]["status"] = "in-progress"
-        if course.completed_lessons == None:
+        if course.completed_lessons == None or course.completed_lessons == {}:
             progr=0
         else:
             progr = round(k/com * 100)
