@@ -651,7 +651,7 @@ def get_courses(student_id: Optional[int] = None, payload: dict = Depends(verify
             active = True
         c = {"title": data[0]["title"], "level": data[0]["level"], "description": data[0]["description"], 
              "duration": data[0]["duration"], "teacher_id": course.teacher_id, "completedLessons": com, 
-             "totalLessons": k, "progress": progr, "isActive": active, "name": course.course_name, "startDate": course.start_date,
+             "totalLessons": k, "progress": progr, "isActive": active, "name": course.course_id, "startDate": course.start_date,
              "instructor": { "surname": teacher.surname, "name": teacher.name, "title": "Senior Python Developer", "avatar": avatar_t }, 
              "modules": data2["modules"]}
         cours.append(c)
