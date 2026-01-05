@@ -1,4 +1,5 @@
 from sqlalchemy import Column, Integer, String, ForeignKey, Date, DateTime, UniqueConstraint
+from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import relationship
 from .database import Base
 from datetime import datetime
@@ -28,14 +29,14 @@ class Users(Base):
 
 
 class Courses(Base):
-    __tablename__ = "courses"
+    __tablename__ = "user_courses"
 
     id = Column(Integer, primary_key=True, index=True)
     student_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     teacher_id = Column(Integer, ForeignKey("users.id"))
     course_name = Column(String, nullable=False)
-    completed_lessons = Column(Integer, default=0)
-    block_number = Column(Integer, default=1)
+    completed_lessons = Column(JSONB, default=dict)
+    start_date = Column(Date)
 
     student = relationship("Users", foreign_keys=[student_id])
     teacher = relationship("Users", foreign_keys=[teacher_id])

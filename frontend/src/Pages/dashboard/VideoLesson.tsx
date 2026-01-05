@@ -36,7 +36,7 @@ const VideoLesson = () => {
   };
 
   return (
-    <DashboardLayout showBack title={lesson.title}>
+    <DashboardLayout showBack title={state.lesson.title}>
       <div className="max-w-5xl mx-auto space-y-6">
         {/* Video Player */}
         <Card variant="glow" className="overflow-hidden">

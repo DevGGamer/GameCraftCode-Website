@@ -14,6 +14,7 @@ const MyCourses = () => {
   const [courses, setCourses] = useState([
     {
       id: 1,
+      name: "",
       title: 'Python для начинающих',
       description: 'Изучите основы программирования на Python',
       progress: 65,
@@ -26,6 +27,7 @@ const MyCourses = () => {
     },
     {
       id: 2,
+      name: "",
       title: 'Создание игр в Scratch',
       description: 'Создавайте увлекательные игры без кода',
       progress: 100,
@@ -38,6 +40,7 @@ const MyCourses = () => {
     },
     {
       id: 3,
+      name: "",
       title: 'Веб-разработка: HTML & CSS',
       description: 'Создайте свой первый сайт',
       progress: 30,
@@ -50,6 +53,7 @@ const MyCourses = () => {
     },
     {
       id: 4,
+      name: "",
       title: 'JavaScript: Интерактивные сайты',
       description: 'Оживите свои веб-страницы',
       progress: 0,
@@ -74,6 +78,7 @@ const MyCourses = () => {
           //console.log(response.data)
           const cours = response.data.map((item, index) => ({
             id: index,
+            name: item.name,
             title: item.title,
             description: item.description,
             progress: item.progress,
@@ -82,6 +87,7 @@ const MyCourses = () => {
             duration: item.duration,
             level: item.level,
             isActive: item.isActive,
+            startDate: item.startDate,
             color: 'from-purple-500 to-pink-500',
             instructor: item.instructor,
             modules: item.modules
@@ -158,7 +164,7 @@ const MyCourses = () => {
                 </div>
 
                 {/* Action */}
-                <Link to={`/dashboard/courses/${course.id}`} state={{ course }}>
+                <Link to={`/dashboard/courses/${course.name}`} state={{ course }}>
                   <Button 
                     variant={course.isActive ? 'cosmic' : 'outline'} 
                     className="w-full"
