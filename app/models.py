@@ -1,4 +1,5 @@
 from sqlalchemy import Column, Integer, String, ForeignKey, Date, DateTime, UniqueConstraint, func, text
+from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import relationship
 from .database import Base
 from datetime import datetime
@@ -26,7 +27,6 @@ class Users(Base):
     achievements = relationship("UserAchievement", back_populates="user", cascade="all, delete-orphan")
     activities = relationship("UserActivity", back_populates="user", cascade="all, delete-orphan")
 
-
 class UserCourses(Base):
     __tablename__ = "user_courses"
 
@@ -35,8 +35,7 @@ class UserCourses(Base):
     teacher_id = Column(Integer, ForeignKey("users.id"))
     course_id = Column(String, nullable=False)
     start_date = Column(Date, nullable=False)
-    completed_lessons = Column(Integer, default=0, server_default=text("0"))
-    block_number = Column(Integer, default=1, server_default=text("1"))
+    completed_lessons = Column(JSONB, default=dict)
 
     student = relationship("Users", foreign_keys=[student_id])
     teacher = relationship("Users", foreign_keys=[teacher_id])
