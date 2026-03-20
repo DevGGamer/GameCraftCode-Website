@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,42 +12,19 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import StarField from "@/components/StarField";
 import { Rocket, User, Lock, ArrowLeft, Eye, EyeOff } from "lucide-react";
-import axios from "axios";
-
-const host_name = "http://localhost";
+import api from "@/api";
+import { useAuth } from "@/contexts/AuthContext";
 
 const Login = () => {
-  useEffect(() => {
-    const rememberMe = localStorage.getItem("rememberMe") === "true";
-
-    if (rememberMe == false) {
-      localStorage.removeItem("token");
-      return;
-    }
-
-    const token = localStorage.getItem("token");
-
-    if (!token) return;
-
-    const checkToken = async () => {
-      try {
-        const res = await fetch(`${host_name}:8000/api/protected`, {
-          headers: {
-            authorization: `Bearer ${token}`,
-          },
-        });
-
-        if (!res.ok) return;
-
-        navigate(`/dashboard`);
-      } catch (err) {}
-    };
-
-    checkToken();
-  }, []);
-
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { user, loading, login } = useAuth();
+
+  // Если уже авторизован — редирект
+  if (!loading && user) {
+    navigate("/dashboard", { replace: true });
+    return null;
+  }
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -64,48 +41,34 @@ const Login = () => {
     e.preventDefault();
     setIsLoading(true);
 
-    // Simulate login
-    await new Promise((resolve) => setTimeout(resolve, 1500));
-
-    axios
-      .post(`${host_name}:8000/api/login`, {
+    try {
+      const response = await api.post("/api/login", {
         login: formData.login,
         password: formData.password,
-      })
-      .then((response) => {
-        const { token } = response.data;
-
-        if (rememberMe) localStorage.setItem("rememberMe", "true");
-        else localStorage.removeItem("rememberMe");
-
-        localStorage.setItem("token", token);
-
-        toast({
-          title: "Добро пожаловать!",
-          description: "Вход выполнен успешно.",
-        });
-
-        setIsLoading(false);
-        navigate(`/dashboard`);
-      })
-      .catch((error) => {
-        console.error("Login error:", error);
-        if (error.response) {
-          console.log("Response data:", error.response.data);
-          console.log("Status:", error.response.status);
-        } else if (error.request) {
-          console.log("No response received:", error.request);
-        } else {
-          console.log("Request error:", error.message);
-        }
-
-        toast({
-          title: "Упс! Что-то пошло не так :(",
-          description: "Попробуйте ещё раз.",
-        });
-
-        setIsLoading(false);
       });
+
+      const { token } = response.data;
+
+      if (rememberMe) localStorage.setItem("rememberMe", "true");
+      else localStorage.removeItem("rememberMe");
+
+      login(token);
+
+      toast({
+        title: "Добро пожаловать!",
+        description: "Вход выполнен успешно.",
+      });
+
+      navigate("/dashboard");
+    } catch (error: any) {
+      const message = error.response?.data?.detail || "Попробуйте ещё раз.";
+      toast({
+        title: "Ошибка входа",
+        description: message,
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (

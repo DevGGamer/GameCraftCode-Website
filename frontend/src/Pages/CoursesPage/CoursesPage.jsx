@@ -1,8 +1,6 @@
 import { useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '@/api';
 import './CoursesPage.css';
-
-const host = 'http://localhost';
 
 export default function CoursesPage() {
   const [courses, setCourses] = useState([]);
@@ -24,7 +22,7 @@ export default function CoursesPage() {
 
   const loadCourses = async () => {
     try {
-      const res = await axios.get(`${host}/api/courses`);
+      const res = await api.get(`/api/courses`);
       setCourses(res.data.courses);
     } catch (err) {
       console.error('Ошибка загрузки курсов', err);
@@ -57,7 +55,7 @@ export default function CoursesPage() {
     try {
       const newLessons = form.lessons.filter(l => !l.id && l.video);
       for (const lesson of newLessons) {
-        await axios.delete(`${host}/api/video`, { data: { lesson } });
+        await api.delete(`/api/video`, { data: { lesson } });
       }
     } catch (err) {
       console.error('Ошибка при отмене', err);
@@ -79,9 +77,9 @@ export default function CoursesPage() {
 
     try {
       if (editingId) {
-        await axios.put(`${host}/api/courses/${editingId}`, payload);
+        await api.put(`/api/courses/${editingId}`, payload);
       } else {
-        await axios.post(`${host}/api/courses`, payload);
+        await api.post(`/api/courses`, payload);
       }
       await loadCourses();
       closeModal();
@@ -95,7 +93,7 @@ export default function CoursesPage() {
     formData.append('image', file);
   
     try {
-      const res = await axios.post(`${host}/api/upload-icon/${editingId}`, formData, {
+      const res = await api.post(`/api/upload-icon/${editingId}`, formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
       handleInput('course_icon_path', res.data.imagePath);
@@ -107,7 +105,7 @@ export default function CoursesPage() {
   const deleteCourse = async (id) => {
     if (confirm('Удалить курс?')) {
       try {
-        await axios.delete(`${host}/api/courses/${id}`);
+        await api.delete(`/api/courses/${id}`);
         loadCourses();
       } catch (err) {
         console.error('Ошибка удаления', err);
@@ -148,7 +146,7 @@ export default function CoursesPage() {
     const formData = new FormData();
     formData.append('video', file);
     try {
-      const res = await axios.post(`${host}/api/video`, formData, {
+      const res = await api.post(`/api/video`, formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
       updateLesson(index, 'video', res.data.path);
@@ -225,7 +223,7 @@ export default function CoursesPage() {
 
             {form.course_icon_path && (
               <img
-                src={`${host}${form.course_icon_path}`}
+                src={`${form.course_icon_path}`}
                 alt="Иконка курса"
                 style={{ width: '120px', marginTop: '10px', borderRadius: '8px', border: '1px solid #0ff' }}
               />
@@ -292,7 +290,7 @@ export default function CoursesPage() {
                         />
                       </label>
                       {lesson.video && (
-                        <video width="300" controls src={`${host}/uploads/videos/${lesson.video}`} />
+                        <video width="300" controls src={`/uploads/videos/${lesson.video}`} />
                       )}
                     </div>
                   )}

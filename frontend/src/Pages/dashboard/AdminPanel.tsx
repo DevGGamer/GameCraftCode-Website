@@ -47,59 +47,36 @@ import {
   Search,
   BookOpen,
   Heart,
+  KeyRound,
+  Copy,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
-const host_name = "http://localhost:8000";
+import api from "@/api";
 type UserRole = "admin" | "student" | "teacher" | "parent";
 
-const USERS_API_URL = `${host_name}/api/users`;
-const COURSES_API_URL = `${host_name}/api/courses`;
-
 async function fetchUsers(): Promise<User[]> {
-  const res = await fetch(USERS_API_URL, {
-    headers: {
-      Authorization: `Bearer ${localStorage.getItem("token")}`,
-    },
-  });
-  if (!res.ok) throw new Error("Не удалось загрузить пользователей");
-  return res.json();
+  const res = await api.get("/api/users");
+  return res.data;
 }
 
 async function createUserApi(payload: any) {
-  const res = await fetch(USERS_API_URL, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${localStorage.getItem("token")}`,
-    },
-    body: JSON.stringify(payload),
-  });
-  if (!res.ok) throw new Error("Ошибка создания пользователя");
-  return res.json();
+  const res = await api.post("/api/users", payload);
+  return res.data;
 }
 
 async function updateUserApi(userId: string, payload: any) {
-  const res = await fetch(`${USERS_API_URL}/${userId}`, {
-    method: "PUT",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${localStorage.getItem("token")}`,
-    },
-    body: JSON.stringify(payload),
-  });
-  if (!res.ok) throw new Error("Ошибка обновления пользователя");
-  return res.json();
+  const res = await api.put(`/api/users/${userId}`, payload);
+  return res.data;
 }
 
 async function deleteUserApi(userId: string) {
-  const res = await fetch(`${USERS_API_URL}/${userId}`, {
-    method: "DELETE",
-    headers: {
-      Authorization: `Bearer ${localStorage.getItem("token")}`,
-    },
-  });
-  if (!res.ok) throw new Error("Ошибка удаления пользователя");
+  await api.delete(`/api/users/${userId}`);
+}
+
+async function resetPasswordApi(userId: string): Promise<{ new_password: string }> {
+  const res = await api.post(`/api/users/${userId}/reset-password`);
+  return res.data;
 }
 
 interface FormData {
@@ -182,6 +159,8 @@ const AdminPanel = () => {
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [isResetPasswordDialogOpen, setIsResetPasswordDialogOpen] = useState(false);
+  const [generatedPassword, setGeneratedPassword] = useState<string | null>(null);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
 
   const [formData, setFormData] = useState<FormData>({
@@ -224,16 +203,9 @@ const AdminPanel = () => {
   const [courses, setCourses] = useState<Course[]>([]);
 
   useEffect(() => {
-    fetch(COURSES_API_URL, {
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem("token")}`,
-      },
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        console.log("COURSES RESPONSE:", data);
-        setCourses(data);
-      });
+    api.get("/api/courses")
+      .then((res) => setCourses(res.data))
+      .catch((err) => console.error("Ошибка загрузки курсов:", err));
   }, []);
 
   const allStudents = useMemo(
@@ -412,6 +384,22 @@ const AdminPanel = () => {
       toast({
         title: "Ошибка",
         description: "Не удалось удалить пользователя",
+        variant: "destructive",
+      });
+    }
+  }, [selectedUser, toast]);
+
+  const handleResetPassword = useCallback(async () => {
+    if (!selectedUser) return;
+
+    try {
+      const data = await resetPasswordApi(selectedUser.id);
+      setGeneratedPassword(data.new_password);
+    } catch (e) {
+      console.error(e);
+      toast({
+        title: "Ошибка",
+        description: "Не удалось сбросить пароль",
         variant: "destructive",
       });
     }
@@ -713,6 +701,19 @@ const AdminPanel = () => {
                           className="text-muted-foreground hover:text-foreground"
                         >
                           <Pencil className="w-4 h-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => {
+                            setSelectedUser(user);
+                            setGeneratedPassword(null);
+                            setIsResetPasswordDialogOpen(true);
+                          }}
+                          className="text-muted-foreground hover:text-yellow-500"
+                          title="Сбросить пароль"
+                        >
+                          <KeyRound className="w-4 h-4" />
                         </Button>
                         <Button
                           variant="ghost"
@@ -1368,6 +1369,64 @@ const AdminPanel = () => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Reset Password Dialog */}
+      <Dialog
+        open={isResetPasswordDialogOpen}
+        onOpenChange={(open) => {
+          setIsResetPasswordDialogOpen(open);
+          if (!open) setGeneratedPassword(null);
+        }}
+      >
+        <DialogContent className="bg-card border-border">
+          <DialogHeader>
+            <DialogTitle className="text-foreground">
+              Сброс пароля
+            </DialogTitle>
+            <DialogDescription>
+              {generatedPassword
+                ? `Новый пароль для ${selectedUser?.name} ${selectedUser?.surname}. Скопируйте его — он больше не будет показан.`
+                : `Сгенерировать новый пароль для ${selectedUser?.name} ${selectedUser?.surname}?`}
+            </DialogDescription>
+          </DialogHeader>
+
+          {generatedPassword && (
+            <div className="flex items-center gap-2 p-3 bg-muted rounded-md font-mono text-lg">
+              <span className="flex-1 select-all">{generatedPassword}</span>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => {
+                  navigator.clipboard.writeText(generatedPassword);
+                  toast({ title: "Скопировано" });
+                }}
+              >
+                <Copy className="w-4 h-4" />
+              </Button>
+            </div>
+          )}
+
+          <DialogFooter>
+            {!generatedPassword ? (
+              <>
+                <Button
+                  variant="outline"
+                  onClick={() => setIsResetPasswordDialogOpen(false)}
+                >
+                  Отмена
+                </Button>
+                <Button onClick={handleResetPassword}>
+                  Сбросить пароль
+                </Button>
+              </>
+            ) : (
+              <Button onClick={() => setIsResetPasswordDialogOpen(false)}>
+                Закрыть
+              </Button>
+            )}
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </DashboardLayout>
   );
 };

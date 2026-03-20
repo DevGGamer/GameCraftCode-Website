@@ -2,68 +2,28 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Link } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Rocket, Star, Code, Gamepad2, Brain, Cpu } from "lucide-react";
+import { Code, Gamepad2 } from "lucide-react";
 
 const programs = [
   {
-    icon: Gamepad2,
-    title: "Создание игр в Scratch",
-    age: "8–10 лет",
-    level: "Начальный",
-    description: "Первые шаги в программировании через визуальное создание игр и анимаций",
-    skills: ["Логика", "Анимация", "Игры"],
-    color: "from-[hsl(280,80%,60%)] to-[hsl(320,80%,60%)]",
-    slug: 'game-creation'
-  },
-  {
     icon: Code,
-    title: "Python для начинающих",
-    age: "11–13 лет",
-    level: "Базовый",
-    description: "Изучаем один из самых востребованных языков через проекты и мини-игры",
-    skills: ["Python", "Алгоритмы", "Проекты"],
+    title: "Программирование на Python",
+    age: "10–16 лет",
+    level: "С нуля",
+    description: "От первой программы до собственной игры: tkinter-приложения, работа с API и полноценная аркада на Pygame",
+    skills: ["Python", "Tkinter", "Pygame"],
     color: "from-[hsl(200,80%,50%)] to-[hsl(230,80%,60%)]",
     slug: 'python-kids'
   },
   {
-    icon: Rocket,
-    title: "Веб-разработка",
-    age: "12–15 лет",
-    level: "Средний",
-    description: "Создаём настоящие сайты с помощью HTML, CSS и JavaScript",
-    skills: ["HTML/CSS", "JavaScript", "Сайты"],
-    color: "from-[hsl(150,70%,45%)] to-[hsl(180,70%,50%)]",
-    slug: 'web-development'
-  },
-  {
-    icon: Brain,
-    title: "Искусственный интеллект",
-    age: "14–17 лет",
-    level: "Продвинутый",
-    description: "Погружаемся в машинное обучение и нейронные сети на практике",
-    skills: ["ML", "Data Science", "AI"],
-    color: "from-[hsl(258,100%,59%)] to-[hsl(233,100%,67%)]",
-    slug: 'artificial-intelligence'
-  },
-  {
-    icon: Cpu,
-    title: "Разработка приложений",
-    age: "13–16 лет",
-    level: "Средний",
-    description: "Учимся создавать мобильные приложения для Android и iOS",
-    skills: ["React Native", "UI/UX", "Apps"],
-    color: "from-[hsl(30,90%,55%)] to-[hsl(50,90%,55%)]",
-    slug: 'mobile-apps'
-  },
-  {
-    icon: Star,
-    title: "Олимпиадное программирование",
-    age: "12–17 лет",
-    level: "Экспертный",
-    description: "Готовим к участию в престижных олимпиадах по программированию",
-    skills: ["C++", "Алгоритмы", "Олимпиады"],
+    icon: Gamepad2,
+    title: "Разработка игр на Unity",
+    age: "10–16 лет",
+    level: "С нуля",
+    description: "Изучаем C# и Unity с нуля: от первого скрипта до полноценной 3D-игры с препятствиями, бонусами и меню",
+    skills: ["C#", "Unity", "Геймдев"],
     color: "from-[hsl(350,80%,55%)] to-[hsl(20,80%,55%)]",
-    slug: 'game-design'
+    slug: 'unity-gamedev'
   },
 ];
 
@@ -71,7 +31,7 @@ const ProgramsSection = () => {
   return (
     <section id="programs" className="py-24 relative">
       <div className="absolute inset-0 bg-gradient-to-b from-background via-muted/20 to-background" />
-      
+
       <div className="container mx-auto px-4 relative z-10">
         <div className="text-center max-w-3xl mx-auto mb-16">
           <h2 className="font-display text-3xl md:text-5xl font-bold mb-6">
@@ -81,15 +41,15 @@ const ProgramsSection = () => {
             </span>
           </h2>
           <p className="text-lg text-muted-foreground">
-            От первых шагов в Scratch до продвинутого программирования — 
-            курсы для каждого возраста и уровня подготовки
+            Курсы программирования для детей и подростков —
+            от первой строчки кода до собственного проекта
           </p>
         </div>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {programs.map((program, index) => (
-            <Card 
-              key={program.title} 
+        <div className="grid md:grid-cols-2 gap-6 max-w-4xl mx-auto">
+          {programs.map((program) => (
+            <Card
+              key={program.title}
               variant="glow"
               className="overflow-hidden group"
             >

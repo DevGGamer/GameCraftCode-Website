@@ -6,31 +6,13 @@ import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import DashboardLayout from "@/components/dashboard/DashboardLayout";
 import { User, Camera, Calendar, Save, X } from "lucide-react";
-
-type DashboardData = {
-  user: {
-    name: string;
-    surname: string;
-    birthDate: Date | null;
-    phone: string | null;
-    email: string | null;
-    avatar: string | null;
-    role: "admin" | "teacher" | "student" | "parent";
-  };
-  stats: {
-    coins: number;
-    balance: number;
-    streak: number;
-    level: number;
-    achievements: number;
-  };
-};
-
-const host_name = "http://localhost:8000";
+import { useAuth } from "@/contexts/AuthContext";
+import api from "@/api";
 
 const Profile = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { user, stats, refreshProfile } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
@@ -44,47 +26,22 @@ const Profile = () => {
     avatar: "",
   });
 
-  const [data, setData] = useState<DashboardData | null>(null);
-
   useEffect(() => {
-    const fetchDashboard = async () => {
-      try {
-        const res = await fetch(`${host_name}/api/profile`, {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-        });
-
-        if (!res.ok) {
-          throw new Error("Ошибка загрузки dashboard");
-        }
-
-        const json = await res.json();
-        setData(json);
-      } catch (err) {
-        console.error(err);
-      }
-    };
-
-    fetchDashboard();
-  }, []);
-
-  useEffect(() => {
-    if (!data) return;
+    if (!user) return;
 
     setFormData({
-      name: data.user.name,
-      surname: data.user.surname,
-      email: data.user.email ?? "",
-      birthDate: data.user.birthDate
-        ? new Date(data.user.birthDate).toISOString().slice(0, 10)
+      name: user.name,
+      surname: user.surname ?? "",
+      email: user.email ?? "",
+      birthDate: user.birthDate
+        ? new Date(user.birthDate).toISOString().slice(0, 10)
         : "",
-      phone: data.user.phone ?? "",
-      avatar: data.user.avatar ?? "",
+      phone: user.phone ?? "",
+      avatar: user.avatar ?? "",
     });
 
-    setAvatarPreview(data.user.avatar);
-  }, [data]);
+    setAvatarPreview(user.avatar);
+  }, [user]);
 
   useEffect(() => {
     return () => {
@@ -94,9 +51,7 @@ const Profile = () => {
     };
   }, [avatarPreview]);
 
-  if (!data) return null;
-  // Mock student data
-  const { user, stats } = data;
+  if (!user || !stats) return null;
 
   const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -127,19 +82,8 @@ const Profile = () => {
         form.append("avatar", avatarFile);
       }
 
-      const res = await fetch(`${host_name}/api/profile`, {
-        method: "PUT",
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-        body: form,
-      });
-
-      if (!res.ok) {
-        throw new Error("Ошибка сохранения профиля");
-      }
-
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await api.put("/api/profile", form);
+      await refreshProfile();
 
       toast({
         title: "Профиль обновлён",

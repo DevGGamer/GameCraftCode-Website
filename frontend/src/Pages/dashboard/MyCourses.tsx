@@ -4,117 +4,87 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
-import { BookOpen, Clock, Star, Play } from 'lucide-react';
+import { BookOpen, Clock, Star, Play, Loader2 } from 'lucide-react';
 import { useState, useEffect } from "react";
-import axios from "axios";
+import api from "@/api";
 
-const host_name = 'http://localhost';
+const COURSE_COLORS = [
+  'from-green-500 to-emerald-500',
+  'from-blue-500 to-cyan-500',
+  'from-purple-500 to-pink-500',
+  'from-orange-500 to-yellow-500',
+  'from-red-500 to-rose-500',
+  'from-indigo-500 to-violet-500',
+];
 
 const MyCourses = () => {
-  const [courses, setCourses] = useState([
-    {
-      id: 1,
-      name: "",
-      title: 'Python для начинающих',
-      description: 'Изучите основы программирования на Python',
-      progress: 65,
-      totalLessons: 24,
-      completedLessons: 16,
-      duration: '3 месяца',
-      level: 'Начинающий',
-      isActive: true,
-      color: 'from-green-500 to-emerald-500',
-    },
-    {
-      id: 2,
-      name: "",
-      title: 'Создание игр в Scratch',
-      description: 'Создавайте увлекательные игры без кода',
-      progress: 100,
-      totalLessons: 16,
-      completedLessons: 16,
-      duration: '2 месяца',
-      level: 'Начинающий',
-      isActive: false,
-      color: 'from-orange-500 to-yellow-500',
-    },
-    {
-      id: 3,
-      name: "",
-      title: 'Веб-разработка: HTML & CSS',
-      description: 'Создайте свой первый сайт',
-      progress: 30,
-      totalLessons: 20,
-      completedLessons: 6,
-      duration: '2.5 месяца',
-      level: 'Начинающий',
-      isActive: false,
-      color: 'from-blue-500 to-cyan-500',
-    },
-    {
-      id: 4,
-      name: "",
-      title: 'JavaScript: Интерактивные сайты',
-      description: 'Оживите свои веб-страницы',
-      progress: 0,
-      totalLessons: 28,
-      completedLessons: 0,
-      duration: '4 месяца',
-      level: 'Средний',
-      isActive: false,
-      color: 'from-purple-500 to-pink-500',
-    },
-  ]);
-
-  const token = localStorage.getItem("token");
+  const [courses, setCourses] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-      axios.get(`${host_name}:8000/api/user_course/`, {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
-        })
-        .then((response) => {
-          //console.log(response.data)
-          const cours = response.data.map((item, index) => ({
-            id: index,
-            name: item.name,
-            title: item.title,
-            description: item.description,
-            progress: item.progress,
-            totalLessons: item.totalLessons,
-            completedLessons: item.completedLessons,
-            duration: item.duration,
-            level: item.level,
-            isActive: item.isActive,
-            startDate: item.startDate,
-            color: 'from-purple-500 to-pink-500',
-            instructor: item.instructor,
-            modules: item.modules
-          }))
-          setCourses(prev => [
-            ...prev,
-            ...cours
-          ]);
-        })
-        .catch((error) => {
-          console.log(error);
-        });
-    }, []);
+    api.get("/api/user_course/")
+      .then((response) => {
+        const cours = response.data.map((item: any, index: number) => ({
+          id: index,
+          name: item.name,
+          title: item.title,
+          description: item.description,
+          progress: item.progress,
+          totalLessons: item.totalLessons,
+          completedLessons: item.completedLessons,
+          duration: item.duration,
+          level: item.level,
+          isActive: item.isActive,
+          startDate: item.startDate,
+          color: COURSE_COLORS[index % COURSE_COLORS.length],
+          instructor: item.instructor,
+          modules: item.modules,
+        }));
+        setCourses(cours);
+      })
+      .catch((error) => {
+        console.error("Failed to load courses:", error);
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  }, []);
+
+  if (loading) {
+    return (
+      <DashboardLayout title="Мои курсы">
+        <div className="flex items-center justify-center py-16">
+          <Loader2 className="w-8 h-8 animate-spin text-primary" />
+        </div>
+      </DashboardLayout>
+    );
+  }
+
+  if (courses.length === 0) {
+    return (
+      <DashboardLayout title="Мои курсы">
+        <div className="flex flex-col items-center justify-center py-16 text-center">
+          <BookOpen className="w-16 h-16 text-muted-foreground/30 mb-4" />
+          <h3 className="text-lg font-bold mb-2">У вас пока нет курсов</h3>
+          <p className="text-muted-foreground mb-6">Запишитесь на курс, чтобы начать обучение</p>
+        </div>
+      </DashboardLayout>
+    );
+  }
 
   return (
     <DashboardLayout title="Мои курсы">
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {courses.map((course) => (
-          <Card 
-            key={course.id} 
-            variant={course.isActive ? 'glow' : 'glass'} 
+          <Card
+            key={course.id}
+            variant={course.isActive ? 'glow' : 'glass'}
             className={`overflow-hidden ${course.isActive ? 'ring-2 ring-primary/50' : ''}`}
           >
             <CardContent className="p-0">
               {/* Course Header */}
               <div className={`h-3 bg-gradient-to-r ${course.color}`} />
-              
+
               <div className="p-6">
                 {/* Badges */}
                 <div className="flex items-center gap-2 mb-3">
@@ -165,8 +135,8 @@ const MyCourses = () => {
 
                 {/* Action */}
                 <Link to={`/dashboard/courses/${course.name}`} state={{ course }}>
-                  <Button 
-                    variant={course.isActive ? 'cosmic' : 'outline'} 
+                  <Button
+                    variant={course.isActive ? 'cosmic' : 'outline'}
                     className="w-full"
                   >
                     <Play className="w-4 h-4 mr-2" />

@@ -1,4 +1,3 @@
-import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -18,78 +17,30 @@ import {
   Wallet,
 } from "lucide-react";
 import { Link as RouterLink } from "react-router-dom";
-
-type DashboardData = {
-  user: {
-    name: string;
-    avatar: string | null;
-    role: "admin" | "teacher" | "student" | "parent";
-  };
-  stats: {
-    coins: number;
-    balance: number;
-    streak: number;
-    level: number;
-    achievements: number;
-  };
-};
-
-const host_name = "http://localhost:8000";
+import { useAuth } from "@/contexts/AuthContext";
+import { useState, useEffect } from "react";
+import api from "@/api";
 
 const Dashboard = () => {
-  const [data, setData] = useState<DashboardData | null>(null);
-  const [loading, setLoading] = useState(true);
+  const { user, stats } = useAuth();
+  const [currentCourse, setCurrentCourse] = useState<any>(null);
 
   useEffect(() => {
-    const fetchDashboard = async () => {
-      try {
-        const res = await fetch(`${host_name}/api/profile`, {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-        });
-
-        if (!res.ok) {
-          throw new Error("Ошибка загрузки dashboard");
+    api.get("/api/user_course/")
+      .then((response) => {
+        if (response.data && response.data.length > 0) {
+          const active = response.data.find((c: any) => c.isActive) || response.data[0];
+          setCurrentCourse({
+            title: active.title,
+            progress: active.progress,
+            name: active.name,
+          });
         }
-
-        const json = await res.json();
-        setData(json);
-      } catch (err) {
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchDashboard();
+      })
+      .catch(() => {});
   }, []);
 
-  if (loading) {
-    return (
-      <DashboardLayout>
-        <div className="text-center text-muted-foreground">Загрузка...</div>
-      </DashboardLayout>
-    );
-  }
-
-  if (!data) {
-    return (
-      <DashboardLayout>
-        <div className="text-center text-red-500">
-          Не удалось загрузить данные
-        </div>
-      </DashboardLayout>
-    );
-  }
-
-  const { user, stats } = data;
-
-  const currentCourse = {
-    id: 1,
-    title: "Python для начинающих",
-    progress: 65,
-  };
+  if (!user || !stats) return null;
 
   const dashboardCards = [
     {
@@ -215,23 +166,25 @@ const Dashboard = () => {
         </Card>
 
         {/* Current Course */}
-        <Card variant="glass">
-          <CardContent className="p-6">
-            <div className="flex items-center gap-2 mb-4">
-              <Sparkles className="w-5 h-5 text-primary" />
-              <h2 className="font-bold">Текущий курс</h2>
-            </div>
+        {currentCourse && (
+          <Card variant="glass">
+            <CardContent className="p-6">
+              <div className="flex items-center gap-2 mb-4">
+                <Sparkles className="w-5 h-5 text-primary" />
+                <h2 className="font-bold">Текущий курс</h2>
+              </div>
 
-            <h3 className="text-xl font-bold mb-2">{currentCourse.title}</h3>
+              <h3 className="text-xl font-bold mb-2">{currentCourse.title}</h3>
 
-            <div className="flex items-center gap-3">
-              <Progress value={currentCourse.progress} className="flex-1 h-3" />
-              <span className="font-bold text-primary">
-                {currentCourse.progress}%
-              </span>
-            </div>
-          </CardContent>
-        </Card>
+              <div className="flex items-center gap-3">
+                <Progress value={currentCourse.progress} className="flex-1 h-3" />
+                <span className="font-bold text-primary">
+                  {currentCourse.progress}%
+                </span>
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Navigation */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">

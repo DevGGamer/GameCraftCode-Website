@@ -1,7 +1,8 @@
-import { ReactNode, useEffect, useState } from "react";
+import { ReactNode } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import StarField from "@/components/StarField";
+import { useAuth } from "@/contexts/AuthContext";
 import {
   Rocket,
   BookOpen,
@@ -24,22 +25,6 @@ interface DashboardLayoutProps {
   showBack?: boolean;
 }
 
-type DashboardData = {
-  user: {
-    name: string;
-    avatar: string | null;
-    role: "admin" | "teacher" | "student" | "parent";
-  };
-  stats: {
-    coins: number;
-    balance: number;
-    streak: number;
-    level: number;
-    achievements: number;
-  };
-};
-
-const host_name = "http://localhost:8000";
 
 const navItems = [
   {
@@ -99,43 +84,16 @@ const DashboardLayout = ({
 }: DashboardLayoutProps) => {
   const location = useLocation();
   const navigate = useNavigate();
-  const [data, setData] = useState<DashboardData | null>(null);
+  const { user, stats, logout } = useAuth();
 
-  useEffect(() => {
-    const fetchDashboard = async () => {
-      try {
-        const res = await fetch(`${host_name}/api/profile`, {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-        });
-
-        if (!res.ok) {
-          throw new Error("Ошибка загрузки dashboard");
-        }
-
-        const json = await res.json();
-        setData(json);
-      } catch (err) {
-        console.error(err);
-      }
-    };
-
-    fetchDashboard();
-  }, []);
-
-  if (!data) return;
-
-  // Mock student data
-  const { user, stats } = data;
+  if (!user || !stats) return null;
 
   const filteredNavItems = navItems.filter((item) =>
     item.roles.includes(user.role)
   );
 
   const handleLogout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("rememberMe");
+    logout();
     navigate("/");
   };
 

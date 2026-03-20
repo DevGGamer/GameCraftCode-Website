@@ -3,14 +3,33 @@ from fastapi import HTTPException, status, Security
 from datetime import datetime, timedelta
 from jose import jwt, JWTError
 from dotenv import load_dotenv
+from argon2 import PasswordHasher
+from argon2.exceptions import VerifyMismatchError
 import os
+import secrets
+import string
 
 load_dotenv()
 
 JWT_SECRET = os.getenv("JWT_SECRET")
 JWT_EXPIRES_IN_HOURS = 24
 
+ph = PasswordHasher()
+
 authorization_scheme = APIKeyHeader(name="Authorization", auto_error=False)
+
+def hash_password(password: str) -> str:
+    return ph.hash(password)
+
+def verify_password(plain_password: str, hashed_password: str) -> bool:
+    try:
+        return ph.verify(hashed_password, plain_password)
+    except VerifyMismatchError:
+        return False
+
+def generate_random_password(length: int = 12) -> str:
+    alphabet = string.ascii_letters + string.digits
+    return ''.join(secrets.choice(alphabet) for _ in range(length))
 
 def generate_token(user: dict) -> str:
     """
@@ -20,7 +39,8 @@ def generate_token(user: dict) -> str:
     payload = {
         "id": user["id"],
         "role": user["role"],
-        "login": user.get("login")
+        "login": user.get("login"),
+        "exp": expire
     }
     token = jwt.encode(payload, JWT_SECRET, algorithm="HS256")
     return token

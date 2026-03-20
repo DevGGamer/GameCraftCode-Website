@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -6,9 +6,9 @@ import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
-import { 
-  BookOpen, 
-  Clock, 
+import {
+  BookOpen,
+  Clock,
   Calendar,
   Play,
   CheckCircle2,
@@ -26,7 +26,7 @@ const CurrentCourse = () => {
   const navigate = useNavigate();
   const [expandedModule, setExpandedModule] = useState<number | null>(1);
 
-  const handlePlayVideo = (lessonId: number, lesson) => {
+  const handlePlayVideo = (lessonId: number, lesson: any) => {
     navigate(`/dashboard/courses/${courseId}/lesson/${lessonId}`, { state: { lesson }} );
   };
 
@@ -35,112 +35,22 @@ const CurrentCourse = () => {
   };
 
   const { state } = useLocation();
-  console.log(state)
 
-  // Mock course data
-  const course = {
-    id: courseId,
-    title: 'Python для начинающих',
-    description: 'Этот курс познакомит вас с основами программирования на Python — одном из самых популярных языков в мире. Вы научитесь писать простые программы, работать с переменными, условиями, циклами и функциями. К концу курса вы создадите несколько увлекательных проектов!',
-    instructor: {
-      name: 'Анна Петрова',
-      avatar: null,
-      title: 'Senior Python Developer',
-    },
-    duration: '3 месяца',
-    startDate: '15 января 2024',
-    totalLessons: 24,
-    completedLessons: 16,
-    progress: 65,
-  };
-
-  const modules = [
-    {
-      id: 1,
-      title: 'Введение в Python',
-      lessons: 4,
-      completed: 4,
-      status: 'completed',
-      items: [
-        { id: 1, title: 'Что такое Python?', type: 'video', duration: '15 мин', completed: true },
-        { id: 2, title: 'Установка Python', type: 'video', duration: '10 мин', completed: true },
-        { id: 3, title: 'Первая программа', type: 'video', duration: '20 мин', completed: true },
-        { id: 4, title: 'Практика: Hello World', type: 'task', completed: true },
-      ],
-    },
-    {
-      id: 2,
-      title: 'Переменные и типы данных',
-      lessons: 5,
-      completed: 5,
-      status: 'completed',
-      items: [
-        { id: 5, title: 'Что такое переменные?', type: 'video', duration: '18 мин', completed: true },
-        { id: 6, title: 'Числа и строки', type: 'video', duration: '22 мин', completed: true },
-        { id: 7, title: 'Списки и словари', type: 'video', duration: '25 мин', completed: true },
-        { id: 8, title: 'Преобразование типов', type: 'video', duration: '15 мин', completed: true },
-        { id: 9, title: 'Практика: Калькулятор', type: 'task', completed: true },
-      ],
-    },
-    {
-      id: 3,
-      title: 'Условия и циклы',
-      lessons: 6,
-      completed: 4,
-      status: 'in-progress',
-      items: [
-        { id: 10, title: 'Условный оператор if', type: 'video', duration: '20 мин', completed: true },
-        { id: 11, title: 'Операторы сравнения', type: 'video', duration: '15 мин', completed: true },
-        { id: 12, title: 'Цикл for', type: 'video', duration: '25 мин', completed: true },
-        { id: 13, title: 'Цикл while', type: 'video', duration: '20 мин', completed: true },
-        { id: 14, title: 'Вложенные циклы', type: 'video', duration: '22 мин', completed: false },
-        { id: 15, title: 'Практика: Угадай число', type: 'task', completed: false },
-      ],
-    },
-    {
-      id: 4,
-      title: 'Функции',
-      lessons: 5,
-      completed: 3,
-      status: 'in-progress',
-      items: [
-        { id: 16, title: 'Создание функций', type: 'video', duration: '20 мин', completed: true },
-        { id: 17, title: 'Параметры и аргументы', type: 'video', duration: '18 мин', completed: true },
-        { id: 18, title: 'Возвращаемые значения', type: 'video', duration: '15 мин', completed: true },
-        { id: 19, title: 'Область видимости', type: 'video', duration: '20 мин', completed: false },
-        { id: 20, title: 'Практика: Мини-игра', type: 'task', completed: false },
-      ],
-    },
-    {
-      id: 5,
-      title: 'Работа с файлами',
-      lessons: 4,
-      completed: 0,
-      status: 'locked',
-      items: [
-        { id: 21, title: 'Чтение файлов', type: 'video', duration: '18 мин', completed: false },
-        { id: 22, title: 'Запись в файлы', type: 'video', duration: '15 мин', completed: false },
-        { id: 23, title: 'Работа с JSON', type: 'video', duration: '22 мин', completed: false },
-        { id: 24, title: 'Финальный проект', type: 'task', completed: false },
-      ],
-    },
-  ];
-
-  const assignments = [
-    { id: 1, title: 'Практика: Hello World', module: 'Введение в Python', status: 'completed', grade: '100%' },
-    { id: 2, title: 'Практика: Калькулятор', module: 'Переменные и типы данных', status: 'completed', grade: '95%' },
-    { id: 3, title: 'Практика: Угадай число', module: 'Условия и циклы', status: 'pending', grade: null },
-    { id: 4, title: 'Практика: Мини-игра', module: 'Функции', status: 'pending', grade: null },
-    { id: 5, title: 'Финальный проект', module: 'Работа с файлами', status: 'locked', grade: null },
-  ];
-
-  const recordings = [
-    { id: 1, title: 'Урок 1: Введение в Python', date: '15 января 2024', duration: '1:30:00' },
-    { id: 2, title: 'Урок 2: Переменные', date: '17 января 2024', duration: '1:25:00' },
-    { id: 3, title: 'Урок 3: Типы данных', date: '20 января 2024', duration: '1:35:00' },
-    { id: 4, title: 'Урок 4: Условия', date: '22 января 2024', duration: '1:28:00' },
-    { id: 5, title: 'Урок 5: Циклы', date: '24 января 2024', duration: '1:40:00' },
-  ];
+  // Извлекаем задания из модулей (items с type === 'task')
+  const assignments = useMemo(() => {
+    if (!state?.course?.modules) return [];
+    return state.course.modules.flatMap((module: any) =>
+      (module.items || [])
+        .filter((item: any) => item.type === 'task')
+        .map((item: any) => ({
+          id: item.id,
+          title: item.title,
+          module: module.title,
+          status: module.status === 'locked' ? 'locked' : item.completed ? 'completed' : 'pending',
+          grade: null,
+        }))
+    );
+  }, [state?.course?.modules]);
 
   const getStatusIcon = (status: string) => {
     switch (status) {
@@ -182,12 +92,12 @@ const CurrentCourse = () => {
               <CardTitle className="font-display">Модули курса</CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
-              {state.course.modules.map((module) => (
-                <div 
-                  key={module.id} 
+              {state.course.modules.map((module: any) => (
+                <div
+                  key={module.id}
                   className={`rounded-xl border transition-all ${
-                    module.status === 'locked' 
-                      ? 'border-border/30 bg-card/30 opacity-60' 
+                    module.status === 'locked'
+                      ? 'border-border/30 bg-card/30 opacity-60'
                       : 'border-border/50 bg-card/50 hover:border-primary/30'
                   }`}
                 >
@@ -206,7 +116,7 @@ const CurrentCourse = () => {
                       </div>
                     </div>
                     {module.status !== 'locked' && (
-                      expandedModule === module.id 
+                      expandedModule === module.id
                         ? <ChevronUp className="w-5 h-5 text-muted-foreground" />
                         : <ChevronDown className="w-5 h-5 text-muted-foreground" />
                     )}
@@ -214,8 +124,8 @@ const CurrentCourse = () => {
 
                   {expandedModule === module.id && module.status !== 'locked' && (
                     <div className="px-4 pb-4 space-y-2">
-                      {module.items.map((item) => (
-                        <div 
+                      {module.items.map((item: any) => (
+                        <div
                           key={item.id}
                           className={`flex items-center justify-between p-3 rounded-lg ${
                             item.completed ? 'bg-green-500/10' : 'bg-card/50'
@@ -238,18 +148,18 @@ const CurrentCourse = () => {
                             {item.completed ? (
                               <CheckCircle2 className="w-4 h-4 text-green-500" />
                             ) : item.type === 'video' ? (
-                              <Button 
-                                size="sm" 
-                                variant="ghost" 
+                              <Button
+                                size="sm"
+                                variant="ghost"
                                 className="h-7 px-2"
                                 onClick={() => handlePlayVideo(item.id, item)}
                               >
                                 <Play className="w-3 h-3" />
                               </Button>
                             ) : (
-                              <Button 
-                                size="sm" 
-                                variant="ghost" 
+                              <Button
+                                size="sm"
+                                variant="ghost"
                                 className="h-7 px-2"
                                 onClick={() => handleDoAssignment(item.id)}
                               >
@@ -277,78 +187,65 @@ const CurrentCourse = () => {
             <TabsContent value="assignments" className="mt-4">
               <Card variant="glass">
                 <CardContent className="p-4 space-y-3">
-                  {assignments.map((assignment) => (
-                    <div 
-                      key={assignment.id}
-                      className={`flex items-center justify-between p-4 rounded-xl border ${
-                        assignment.status === 'locked' 
-                          ? 'border-border/30 bg-card/30 opacity-60' 
-                          : 'border-border/50 bg-card/50'
-                      }`}
-                    >
-                      <div className="flex items-center gap-3">
-                        {assignment.status === 'completed' ? (
-                          <CheckCircle2 className="w-5 h-5 text-green-500" />
-                        ) : assignment.status === 'locked' ? (
-                          <Lock className="w-5 h-5 text-muted-foreground" />
-                        ) : (
-                          <Circle className="w-5 h-5 text-primary" />
-                        )}
-                        <div>
-                          <h4 className="font-medium text-foreground">{assignment.title}</h4>
-                          <p className="text-sm text-muted-foreground">{assignment.module}</p>
+                  {assignments.length > 0 ? (
+                    assignments.map((assignment: any) => (
+                      <div
+                        key={assignment.id}
+                        className={`flex items-center justify-between p-4 rounded-xl border ${
+                          assignment.status === 'locked'
+                            ? 'border-border/30 bg-card/30 opacity-60'
+                            : 'border-border/50 bg-card/50'
+                        }`}
+                      >
+                        <div className="flex items-center gap-3">
+                          {assignment.status === 'completed' ? (
+                            <CheckCircle2 className="w-5 h-5 text-green-500" />
+                          ) : assignment.status === 'locked' ? (
+                            <Lock className="w-5 h-5 text-muted-foreground" />
+                          ) : (
+                            <Circle className="w-5 h-5 text-primary" />
+                          )}
+                          <div>
+                            <h4 className="font-medium text-foreground">{assignment.title}</h4>
+                            <p className="text-sm text-muted-foreground">{assignment.module}</p>
+                          </div>
                         </div>
+                        {assignment.grade ? (
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => navigate(`/dashboard/courses/${courseId}/assignment/${assignment.id}/feedback`)}
+                          >
+                            <Badge className="bg-green-500/20 text-green-400">{assignment.grade}</Badge>
+                          </Button>
+                        ) : assignment.status !== 'locked' ? (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => handleDoAssignment(assignment.id)}
+                          >
+                            Выполнить
+                          </Button>
+                        ) : null}
                       </div>
-                      {assignment.grade ? (
-                        <Button 
-                          size="sm" 
-                          variant="ghost"
-                          onClick={() => navigate(`/dashboard/courses/${courseId}/assignment/${assignment.id}/feedback`)}
-                        >
-                          <Badge className="bg-green-500/20 text-green-400">{assignment.grade}</Badge>
-                        </Button>
-                      ) : assignment.status !== 'locked' ? (
-                        <Button 
-                          size="sm" 
-                          variant="outline"
-                          onClick={() => handleDoAssignment(assignment.id)}
-                        >
-                          Выполнить
-                        </Button>
-                      ) : null}
+                    ))
+                  ) : (
+                    <div className="flex flex-col items-center justify-center py-8 text-center">
+                      <FileText className="w-12 h-12 text-muted-foreground/30 mb-3" />
+                      <p className="text-muted-foreground">Заданий пока нет</p>
                     </div>
-                  ))}
+                  )}
                 </CardContent>
               </Card>
             </TabsContent>
 
             <TabsContent value="recordings" className="mt-4">
               <Card variant="glass">
-                <CardContent className="p-4 space-y-3">
-                  {recordings.map((recording) => (
-                    <div 
-                      key={recording.id}
-                      className="flex items-center justify-between p-4 rounded-xl border border-border/50 bg-card/50"
-                    >
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-lg bg-secondary/20 flex items-center justify-center">
-                          <Video className="w-5 h-5 text-secondary" />
-                        </div>
-                        <div>
-                          <h4 className="font-medium text-foreground">{recording.title}</h4>
-                          <p className="text-sm text-muted-foreground">{recording.date} • {recording.duration}</p>
-                        </div>
-                      </div>
-                      <Button 
-                        size="sm" 
-                        variant="ghost"
-                        onClick={() => handlePlayVideo(recording.id, recording)}
-                      >
-                        <Play className="w-4 h-4 mr-1" />
-                        Смотреть
-                      </Button>
-                    </div>
-                  ))}
+                <CardContent className="p-4">
+                  <div className="flex flex-col items-center justify-center py-8 text-center">
+                    <Video className="w-12 h-12 text-muted-foreground/30 mb-3" />
+                    <p className="text-muted-foreground">Записи занятий пока недоступны</p>
+                  </div>
                 </CardContent>
               </Card>
             </TabsContent>
@@ -366,26 +263,28 @@ const CurrentCourse = () => {
         {/* Sidebar */}
         <div className="space-y-6">
           {/* Instructor */}
-          <Card variant="glass">
-            <CardHeader>
-              <CardTitle className="font-display text-base">Преподаватель</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="flex items-center gap-4">
-                <div className="w-14 h-14 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center">
-                  {state.course.instructor.avatar ? (
-                    <img src={state.course.instructor.avatar} alt={state.course.instructor.name} className="w-full h-full rounded-full object-cover" />
-                  ) : (
-                    <User className="w-7 h-7 text-primary-foreground" />
-                  )}
+          {state.course.instructor && (
+            <Card variant="glass">
+              <CardHeader>
+                <CardTitle className="font-display text-base">Преподаватель</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="flex items-center gap-4">
+                  <div className="w-14 h-14 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center">
+                    {state.course.instructor.avatar ? (
+                      <img src={state.course.instructor.avatar} alt={state.course.instructor.name} className="w-full h-full rounded-full object-cover" />
+                    ) : (
+                      <User className="w-7 h-7 text-primary-foreground" />
+                    )}
+                  </div>
+                  <div>
+                    <h4 className="font-bold text-foreground">{state.course.instructor.name}</h4>
+                    <p className="text-sm text-muted-foreground">{state.course.instructor.title}</p>
+                  </div>
                 </div>
-                <div>
-                  <h4 className="font-bold text-foreground">{state.course.instructor.name}</h4>
-                  <p className="text-sm text-muted-foreground">{state.course.instructor.title}</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+          )}
 
           {/* Course Info */}
           <Card variant="glass">

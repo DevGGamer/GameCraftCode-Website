@@ -1,9 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from "react-router-dom";
-import axios from 'axios';
+import api from '@/api';
 import './EducationPage.css';
-
-const host_name = 'http://localhost';
 
 function EducationPage() {
   const { id } = useParams(); 
@@ -27,8 +25,7 @@ function EducationPage() {
 
   useEffect(() => {
     const fetchCourses = async () => {
-      const res = await axios.get(`${host_name}:8000/api/user_course/`, {
-                      headers: { Authorization: `Bearer ${localStorage.token}`} });
+      const res = await api.get("/api/user_course/");
       setCourses(res.data);
     };
     fetchCourses();
@@ -36,13 +33,11 @@ function EducationPage() {
   
   const openCourseModal = async (course) => {
     setSelectedCourse(course);
-    const image = await axios.get(`${host_name}:8000/api/user/image/${course.teacher_id}`, {
-            headers: {
-              Authorization: `Bearer ${localStorage.token}`} })
+    const image = await api.get(`/api/user/image/${course.teacher_id}`)
     setTeacherImage(image.data.imageUrl)
     setExpandedLessonIndex(null);
 
-    await axios.get(`${host_name}:8080/api/course-relations/${course.id}/${id}`)
+    await api.get(`/api/course-relations/${course.id}/${id}`)
     .then(res => setSelectedPartner(res.data.partner))
     .catch(error => console.log(error.data));
   };
@@ -61,7 +56,7 @@ function EducationPage() {
       {!selectedCourse && <div className="courses-grid">
         {courses.map(course => (
           <div key={course.id} className="education-course-card" onClick={() => openCourseModal(course)}>
-            <img src={course.course_icon_path ? `${host_name}:8080${course.course_icon_path}`: "/default-course-image.png"} alt={course.course_name} />
+            <img src={course.course_icon_path ? `${API_URL}${course.course_icon_path}`: "/default-course-image.png"} alt={course.course_name} />
             <h3>{course.course_name}</h3>
           </div>
         ))}

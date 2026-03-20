@@ -1,14 +1,15 @@
 from .database import Base, engine, SessionLocal
 from .models import Users, Courses
 from minio import Minio
+import os
 
 # создаем таблицы
 Base.metadata.create_all(bind=engine)
 
 minio_client = Minio(
-    "localhost:4000",
-    access_key="admin",
-    secret_key="adminpas",
+    os.getenv("MINIO_ENDPOINT", "localhost:4000"),
+    access_key=os.getenv("MINIO_ACCESS_KEY", "admin"),
+    secret_key=os.getenv("MINIO_SECRET_KEY", "adminpas"),
     secure=False
 )
 
